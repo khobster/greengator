@@ -66,14 +66,11 @@ const GreenGator = () => {
             'https://www.darkreading.com/rss.xml',
             'https://www.csoonline.com/index.rss',
             'https://www.infosecurity-magazine.com/rss/news/'
-        ],
-        industries: Object.entries(INDUSTRIES).map(([industry, keywords]) => 
-            `https://news.google.com/rss/search?q=${keywords.join('+OR+')}+when:7d`
-        )
+        ]
     };
 
     const categorizeArticle = (article) => {
-        const text = `${article.title} ${article.description}`.toLowerCase();
+        const text = `${article.title} ${article.description || ''}`.toLowerCase();
         const categories = [];
         const industries = [];
 
@@ -95,6 +92,12 @@ const GreenGator = () => {
         };
     };
 
+    const processDescription = (desc) => {
+        if (!desc) return '';
+        const cleaned = desc.replace(/<[^>]*>/g, '');
+        return cleaned.length > 200 ? cleaned.substring(0, 200) + '...' : cleaned;
+    };
+
     const fetchAllNews = async () => {
         setLoading(true);
         try {
@@ -104,24 +107,21 @@ const GreenGator = () => {
                     fetch(RSS_PROXY + encodeURIComponent(source))
                     .then(res => res.json())
                     .then(data => data.items || [])
-                    .catch(err => {
-                        console.error('Error fetching:', source, err);
-                        return [];
-                    })
+                    .catch(() => [])
                 )
             );
 
             const processed = allNews.flat()
                 .map(item => {
-                    const categorization = categorizeArticle(item);
+                    const {categories, industries} = categorizeArticle(item);
                     return {
-                        title: item.title,
-                        description: item.description?.replace(/<[^>]*>/g, '').substring(0, 200) + '...',
+                        title: item.title || '',
+                        description: processDescription(item.description),
                         date: item.pubDate,
                         link: item.link,
-                        source: new URL(item.link).hostname,
-                        categories: categorization.categories,
-                        industries: categorization.industries
+                        source: item.link ? new URL(item.link).hostname : 'Unknown',
+                        categories,
+                        industries
                     };
                 })
                 .filter(item => 
@@ -129,11 +129,10 @@ const GreenGator = () => {
                     (selectedIndustry === 'all' || item.industries.includes(selectedIndustry))
                 );
 
-            const uniqueNews = Array.from(new Map(processed.map(item => 
-                [item.title, item]
-            )).values());
+            const uniqueNews = Array.from(new Map(processed.map(item => [item.title, item])).values())
+                .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            setNews(uniqueNews.sort((a, b) => new Date(b.date) - new Date(a.date)));
+            setNews(uniqueNews);
         } catch (error) {
             console.error('Error:', error);
         }
@@ -142,7 +141,7 @@ const GreenGator = () => {
 
     React.useEffect(() => {
         fetchAllNews();
-        const interval = setInterval(fetchAllNews, 3600000); // Refresh every hour
+        const interval = setInterval(fetchAllNews, 3600000);
         return () => clearInterval(interval);
     }, [selectedCategory, selectedIndustry]);
 
@@ -150,7 +149,7 @@ const GreenGator = () => {
         <div className="min-h-screen bg-gray-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-4xl font-bold text-green-800">GreenGator</h1>
+                    <h1 className="text-4xl font-bold text-green-800">GreenGator 🐊</h1>
                     <button 
                         onClick={fetchAllNews}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
