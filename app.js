@@ -3,92 +3,199 @@ const GreenGator = () => {
     const [selectedCategory, setSelectedCategory] = React.useState('all');
     const [selectedIndustry, setSelectedIndustry] = React.useState('all');
     const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
 
     const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
-    const CATEGORIES = {
-        'Technical & Operational Accounting': ['accounting standards', 'GAAP', 'IFRS', 'financial reporting', 'audit'],
-        'Capital Markets': ['IPO', 'capital markets', 'securities', 'stock market', 'debt offering'],
-        'Strategic Finance': ['financial planning', 'FP&A', 'financial analytics', 'corporate strategy'],
-        'ESG & Sustainability': ['ESG', 'sustainability', 'climate reporting', 'carbon', 'renewable'],
-        'Operational Transformation': ['process improvement', 'operational efficiency', 'business transformation'],
-        'Technology Transformation': ['digital transformation', 'cloud migration', 'enterprise technology'],
-        'Risk & Compliance': ['risk management', 'compliance', 'regulatory', 'governance'],
-        'Cybersecurity': ['cyber security', 'data breach', 'information security', 'cyber risk'],
-        'Forensic Accounting': ['fraud', 'forensic', 'investigation', 'dispute'],
-        'Tax Services': ['tax', 'IRS', 'taxation', 'tax compliance'],
-        'Treasury Services': ['treasury', 'cash management', 'liquidity', 'working capital'],
-        'Valuation Services': ['valuation', 'fair value', 'business valuation', 'asset valuation'],
-        'Transaction Advisory': ['M&A', 'due diligence', 'transaction', 'deal advisory'],
-        'Workforce Transformation': ['HR transformation', 'talent management', 'workforce planning'],
-        'Restructuring': ['restructuring', 'turnaround', 'bankruptcy', 'reorganization']
+    const KEYWORD_WEIGHTS = {
+        'Technical & Operational Accounting': {
+            primary: ['GAAP', 'IFRS', 'accounting standard', 'financial reporting', 'accounting rule'],
+            secondary: ['audit', 'financial statement', 'accounting principle', 'revenue recognition']
+        },
+        'Capital Markets': {
+            primary: ['IPO', 'capital market', 'securities', 'stock market', 'debt offering'],
+            secondary: ['equity market', 'bond market', 'market capital', 'public offering']
+        },
+        'Strategic Finance': {
+            primary: ['financial planning', 'FP&A', 'financial analytics', 'corporate strategy'],
+            secondary: ['financial forecast', 'budget planning', 'strategic planning', 'financial strategy']
+        },
+        'ESG & Sustainability': {
+            primary: ['ESG', 'sustainability report', 'climate reporting', 'carbon emission'],
+            secondary: ['renewable', 'sustainable', 'climate risk', 'environmental impact']
+        },
+        'Operational Transformation': {
+            primary: ['process improvement', 'operational efficiency', 'business transformation'],
+            secondary: ['workflow optimization', 'process automation', 'operational excellence']
+        },
+        'Technology Transformation': {
+            primary: ['digital transformation', 'cloud migration', 'enterprise technology'],
+            secondary: ['IT modernization', 'tech implementation', 'systems upgrade']
+        },
+        'Risk & Compliance': {
+            primary: ['risk management', 'compliance requirement', 'regulatory', 'governance'],
+            secondary: ['risk assessment', 'internal control', 'compliance program']
+        },
+        'Cybersecurity': {
+            primary: ['cyber attack', 'data breach', 'cybersecurity', 'cyber threat'],
+            secondary: ['information security', 'cyber risk', 'security breach', 'cyber defense']
+        },
+        'Forensic Accounting': {
+            primary: ['fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit'],
+            secondary: ['fraud risk', 'investigation', 'dispute', 'fraud scheme']
+        },
+        'Tax Services': {
+            primary: ['tax regulation', 'tax law', 'tax compliance', 'tax reform'],
+            secondary: ['tax planning', 'tax policy', 'tax requirement', 'IRS']
+        },
+        'Treasury Services': {
+            primary: ['treasury management', 'cash management', 'liquidity', 'working capital'],
+            secondary: ['cash flow', 'treasury operation', 'payment system', 'banking relationship']
+        },
+        'Valuation Services': {
+            primary: ['business valuation', 'fair value', 'asset valuation', 'valuation analysis'],
+            secondary: ['appraisal', 'valuation method', 'market value', 'value assessment']
+        },
+        'Transaction Advisory': {
+            primary: ['M&A', 'due diligence', 'merger', 'acquisition'],
+            secondary: ['deal advisory', 'transaction support', 'deal value', 'deal structure']
+        },
+        'Workforce Transformation': {
+            primary: ['HR transformation', 'talent management', 'workforce planning'],
+            secondary: ['employee experience', 'workforce strategy', 'talent development']
+        },
+        'Restructuring': {
+            primary: ['restructuring', 'turnaround', 'bankruptcy', 'reorganization'],
+            secondary: ['debt restructuring', 'business recovery', 'financial distress']
+        }
     };
 
+    const CATEGORIES = Object.keys(KEYWORD_WEIGHTS);
+
     const INDUSTRIES = {
-        'Business Services': ['business services', 'professional services', 'consulting'],
-        'Consumer': ['retail', 'consumer goods', 'e-commerce'],
-        'Energy & Utilities': ['energy', 'utilities', 'power', 'renewable energy'],
-        'Financial Services': ['banking', 'insurance', 'fintech', 'asset management'],
-        'Healthcare': ['healthcare', 'hospitals', 'medical', 'health insurance'],
-        'Life Sciences': ['pharmaceutical', 'biotech', 'life sciences', 'medical devices'],
-        'Manufacturing': ['manufacturing', 'industrial', 'production', 'supply chain'],
-        'Media & Entertainment': ['media', 'entertainment', 'streaming', 'gaming'],
-        'Real Estate': ['real estate', 'property', 'REIT', 'commercial real estate'],
-        'Software & Tech': ['technology', 'software', 'SaaS', 'cloud computing']
+        'Business Services': {
+            keywords: ['business services', 'professional services', 'consulting'],
+            sources: ['https://news.google.com/rss/search?q="business+services"+OR+"professional+services"+when:7d']
+        },
+        'Consumer': {
+            keywords: ['retail', 'consumer goods', 'e-commerce'],
+            sources: ['https://www.retaildive.com/rss/news/', 'https://www.consumergoods.com/rss.xml']
+        },
+        'Energy & Utilities': {
+            keywords: ['energy', 'utilities', 'power', 'renewable energy'],
+            sources: ['https://www.utilitydive.com/rss/news/', 'https://www.renewableenergyworld.com/feed/']
+        },
+        'Financial Services': {
+            keywords: ['banking', 'insurance', 'fintech', 'asset management'],
+            sources: ['https://www.bankingdive.com/rss/news/', 'https://www.insurancejournal.com/feed/']
+        },
+        'Healthcare': {
+            keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
+            sources: ['https://www.healthcaredive.com/rss/news/', 'https://www.modernhealthcare.com/rss']
+        },
+        'Life Sciences': {
+            keywords: ['pharmaceutical', 'biotech', 'life sciences', 'medical devices'],
+            sources: ['https://www.biopharmadive.com/rss/news/', 'https://www.fiercebiotech.com/rss']
+        },
+        'Manufacturing': {
+            keywords: ['manufacturing', 'industrial', 'production', 'supply chain'],
+            sources: ['https://www.industryweek.com/rss', 'https://www.manufacturing.net/rss']
+        },
+        'Media & Entertainment': {
+            keywords: ['media', 'entertainment', 'streaming', 'gaming'],
+            sources: ['https://variety.com/feed/', 'https://www.mediapost.com/rss']
+        },
+        'Real Estate': {
+            keywords: ['real estate', 'property', 'REIT', 'commercial real estate'],
+            sources: ['https://www.bisnow.com/feed', 'https://www.globest.com/feed']
+        },
+        'Software & Tech': {
+            keywords: ['technology', 'software', 'SaaS', 'cloud computing'],
+            sources: ['https://techcrunch.com/feed/', 'https://www.zdnet.com/rss.xml']
+        }
     };
 
     const NEWS_SOURCES = {
         accounting: [
             'https://www.accountingtoday.com/feed',
             'https://www.journalofaccountancy.com/rss/all-news.xml',
-            'https://www.fasb.org/rss/news',
-            'https://www.ifrs.org/news-and-events/rss-feeds/'
+            'https://www.ifrs.org/news-and-events/rss-feeds/',
+            'https://www.fasb.org/cs/ContentServer?c=Page&pagename=FASB%2FPage%2FSectionPage&cid=1176156316498',
+            'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:7d'
         ],
-        regulatory: [
-            'https://www.sec.gov/rss/news/press.xml',
-            'https://www.irs.gov/newsroom/feed',
-            'https://www.pcaobus.org/rss/news',
-            'https://www.bis.org/rss/feeds.htm'
-        ],
-        finance: [
-            'https://www.reuters.com/rssfeed/businessNews',
-            'https://www.ft.com/rss/companies',
-            'https://www.treasuryandrisk.com/feed/',
-            'https://www.globalcapital.com/rss/custody-and-clearing.rss'
+        markets: [
+            'https://www.globalcapital.com/rss/custody-and-clearing.rss',
+            'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:7d',
+            'https://feeds.finextra.com/finextra-news-capital-markets.rss',
+            'https://www.marketwatch.com/rss/topstories'
         ],
         esg: [
             'https://www.esginvestor.net/feed/',
             'https://www.esgtoday.com/feed/',
-            'https://news.google.com/rss/search?q=ESG+sustainability+when:7d'
+            'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:7d'
         ],
         tech: [
             'https://feeds.feedburner.com/TheHackersNews',
             'https://www.darkreading.com/rss.xml',
             'https://www.csoonline.com/index.rss',
-            'https://www.infosecurity-magazine.com/rss/news/'
+            'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:7d'
+        ],
+        tax: [
+            'https://www.irs.gov/newsroom/feed',
+            'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:7d',
+            'https://www.taxnotes.com/feed'
+        ],
+        treasury: [
+            'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:7d',
+            'https://www.gtnews.com/feed/',
+            'https://www.treasury-management.com/rss/news.php'
+        ],
+        workforce: [
+            'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:7d',
+            'https://www.shrm.org/rss/pages/rss.aspx',
+            'https://www.hcamag.com/feed'
+        ],
+        ma: [
+            'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:7d',
+            'https://www.themiddlemarket.com/feed',
+            'https://www.dealmarket.com/feed'
         ]
     };
 
     const categorizeArticle = (article) => {
         const text = `${article.title} ${article.description || ''}`.toLowerCase();
-        const categories = [];
-        const industries = [];
-
-        Object.entries(CATEGORIES).forEach(([category, keywords]) => {
-            if (keywords.some(keyword => text.includes(keyword.toLowerCase()))) {
-                categories.push(category);
-            }
+        const scores = {};
+        
+        // Score categories
+        Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
+            scores[category] = 0;
+            weights.primary.forEach(keyword => {
+                if (text.includes(keyword.toLowerCase())) scores[category] += 2;
+            });
+            weights.secondary.forEach(keyword => {
+                if (text.includes(keyword.toLowerCase())) scores[category] += 1;
+            });
         });
 
-        Object.entries(INDUSTRIES).forEach(([industry, keywords]) => {
-            if (keywords.some(keyword => text.includes(keyword.toLowerCase()))) {
-                industries.push(industry);
-            }
+        // Score industries
+        Object.entries(INDUSTRIES).forEach(([industry, data]) => {
+            scores[industry] = 0;
+            data.keywords.forEach(keyword => {
+                if (text.includes(keyword.toLowerCase())) scores[industry] += 1;
+            });
         });
+
+        const matchedCategories = Object.entries(scores)
+            .filter(([key, score]) => score >= 2 && CATEGORIES.includes(key))
+            .map(([category]) => category);
+
+        const matchedIndustries = Object.entries(scores)
+            .filter(([key, score]) => score >= 1 && Object.keys(INDUSTRIES).includes(key))
+            .map(([industry]) => industry);
 
         return {
-            categories: categories.length ? categories : ['Other'],
-            industries: industries.length ? industries : ['General']
+            categories: matchedCategories.length ? matchedCategories : ['Other'],
+            industries: matchedIndustries.length ? matchedIndustries : ['General']
         };
     };
 
@@ -98,12 +205,21 @@ const GreenGator = () => {
         return cleaned.length > 200 ? cleaned.substring(0, 200) + '...' : cleaned;
     };
 
-    const fetchAllNews = async () => {
+    const getAllSources = () => {
+        const sources = [
+            ...Object.values(NEWS_SOURCES).flat(),
+            ...Object.values(INDUSTRIES).flatMap(industry => industry.sources)
+        ];
+        return [...new Set(sources)];
+    };
+
+    const fetchNews = async () => {
         setLoading(true);
+        setError(null);
         try {
-            const allSources = [...Object.values(NEWS_SOURCES).flat()];
+            const sources = getAllSources();
             const allNews = await Promise.all(
-                allSources.map(source => 
+                sources.map(source => 
                     fetch(RSS_PROXY + encodeURIComponent(source))
                     .then(res => res.json())
                     .then(data => data.items || [])
@@ -129,19 +245,21 @@ const GreenGator = () => {
                     (selectedIndustry === 'all' || item.industries.includes(selectedIndustry))
                 );
 
-            const uniqueNews = Array.from(new Map(processed.map(item => [item.title, item])).values())
-                .sort((a, b) => new Date(b.date) - new Date(a.date));
+            const uniqueNews = Array.from(
+                new Map(processed.map(item => [item.title, item])).values()
+            ).sort((a, b) => new Date(b.date) - new Date(a.date));
 
             setNews(uniqueNews);
         } catch (error) {
+            setError('Failed to fetch news. Please try again later.');
             console.error('Error:', error);
         }
         setLoading(false);
     };
 
     React.useEffect(() => {
-        fetchAllNews();
-        const interval = setInterval(fetchAllNews, 3600000);
+        fetchNews();
+        const interval = setInterval(fetchNews, 3600000); // Refresh every hour
         return () => clearInterval(interval);
     }, [selectedCategory, selectedIndustry]);
 
@@ -151,10 +269,11 @@ const GreenGator = () => {
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-4xl font-bold text-green-800">GreenGator 🐊</h1>
                     <button 
-                        onClick={fetchAllNews}
+                        onClick={fetchNews}
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        disabled={loading}
                     >
-                        Refresh News
+                        {loading ? 'Refreshing...' : 'Refresh News'}
                     </button>
                 </div>
 
@@ -167,9 +286,10 @@ const GreenGator = () => {
                             className="w-full p-2 border rounded-lg"
                             value={selectedCategory}
                             onChange={(e) => setSelectedCategory(e.target.value)}
+                            disabled={loading}
                         >
                             <option value="all">All Business Lines</option>
-                            {Object.keys(CATEGORIES).map(category => (
+                            {CATEGORIES.map(category => (
                                 <option key={category} value={category}>{category}</option>
                             ))}
                         </select>
@@ -183,6 +303,7 @@ const GreenGator = () => {
                             className="w-full p-2 border rounded-lg"
                             value={selectedIndustry}
                             onChange={(e) => setSelectedIndustry(e.target.value)}
+                            disabled={loading}
                         >
                             <option value="all">All Industries</option>
                             {Object.keys(INDUSTRIES).map(industry => (
@@ -192,46 +313,58 @@ const GreenGator = () => {
                     </div>
                 </div>
 
-                {loading ? (
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                        {error}
+                    </div>
+                )}
+
+                    {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                     </div>
                 ) : (
                     <div className="grid gap-6">
-                        {news.map((item, index) => (
-                            <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
-                                <div className="flex justify-between items-start mb-4">
-                                    <h2 className="text-xl font-semibold text-gray-900">{item.title}</h2>
-                                    <span className="text-sm text-gray-500">
-                                        {new Date(item.date).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <p className="text-gray-600 mb-4">{item.description}</p>
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                    {item.categories.map((cat, i) => (
-                                        <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                            {cat}
-                                        </span>
-                                    ))}
-                                    {item.industries.map((ind, i) => (
-                                        <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                                            {ind}
-                                        </span>
-                                    ))}
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-sm text-gray-500">{item.source}</span>
-                                    <a 
-                                        href={item.link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-green-600 hover:text-green-800 font-medium"
-                                    >
-                                        Read More →
-                                    </a>
-                                </div>
+                        {news.length === 0 ? (
+                            <div className="text-center py-12">
+                                <p className="text-gray-600">No news articles found for the selected filters.</p>
                             </div>
-                        ))}
+                        ) : (
+                            news.map((item, index) => (
+                                <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h2 className="text-xl font-semibold text-gray-900">{item.title}</h2>
+                                        <span className="text-sm text-gray-500">
+                                            {new Date(item.date).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                    <p className="text-gray-600 mb-4">{item.description}</p>
+                                    <div className="flex flex-wrap gap-2 mb-4">
+                                        {item.categories.map((cat, i) => (
+                                            <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                                {cat}
+                                            </span>
+                                        ))}
+                                        {item.industries.map((ind, i) => (
+                                            <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                                {ind}
+                                            </span>
+                                        ))}
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-sm text-gray-500">{item.source}</span>
+                                        <a 
+                                            href={item.link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-green-600 hover:text-green-800 font-medium"
+                                        >
+                                            Read More →
+                                        </a>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
             </div>
