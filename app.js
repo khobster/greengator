@@ -70,6 +70,17 @@ const GreenGator = () => {
         }
     };
 
+    const REGULATORY_KEYWORDS = {
+        'SEC_FILINGS': {
+            primary: ['10-K', '10-Q', '8-K', 'Form S-1', 'proxy statement', 'securities registration'],
+            secondary: ['annual report', 'quarterly report', 'material event']
+        },
+        'IRS_UPDATES': {
+            primary: ['revenue procedure', 'revenue ruling', 'tax guidance', 'notice', 'regulation'],
+            secondary: ['memorandum', 'announcement', 'determination', 'private letter']
+        }
+    };
+
     const CATEGORIES = Object.keys(KEYWORD_WEIGHTS);
 
     const INDUSTRIES = {
@@ -159,15 +170,44 @@ const GreenGator = () => {
             'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:7d',
             'https://www.themiddlemarket.com/feed',
             'https://www.dealmarket.com/feed'
-        ]
+        ],
+        regulatory: {
+            sec: [
+                'https://www.sec.gov/rss/news/press.xml',
+                'https://data.sec.gov/api/xbrl/companyfacts',
+                'https://data.sec.gov/submissions/',
+                'https://www.sec.gov/Archives/edgar/data/',
+                'https://data.sec.gov/api/xbrl/frames/',
+                'https://data.sec.gov/submissions/CIK'
+            ],
+            irs: [
+                'https://www.irs.gov/newsroom/feed',
+                'https://www.irs.gov/api/v1/tax-exempt-organization',
+                'https://www.irs.gov/api/v1/binary-objects',
+                'https://www.irs.gov/api/v1/organization-affiliation',
+                'https://www.irs.gov/uac/tax-stats',
+                'https://www.irs.gov/uac/newsroom/irs-news-releases-for-tax-exempt-organizations'
+            ]
+        }
     };
 
     const categorizeArticle = (article) => {
         const text = `${article.title} ${article.description || ''}`.toLowerCase();
         const scores = {};
         
-        // Score categories
+        // Score regular categories
         Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
+            scores[category] = 0;
+            weights.primary.forEach(keyword => {
+                if (text.includes(keyword.toLowerCase())) scores[category] += 2;
+            });
+            weights.secondary.forEach(keyword => {
+                if (text.includes(keyword.toLowerCase())) scores[category] += 1;
+            });
+        });
+
+        // Score regulatory categories
+        Object.entries(REGULATORY_KEYWORDS).forEach(([category, weights]) => {
             scores[category] = 0;
             weights.primary.forEach(keyword => {
                 if (text.includes(keyword.toLowerCase())) scores[category] += 2;
@@ -185,16 +225,24 @@ const GreenGator = () => {
             });
         });
 
-        const matchedCategories = Object.entries(scores)
+        let matchedCategories = Object.entries(scores)
             .filter(([key, score]) => score >= 2 && CATEGORIES.includes(key))
             .map(([category]) => category);
+
+        // Add regulatory categories if scored high enough
+        if (scores.SEC_FILINGS >= 2) {
+            matchedCategories.push('Technical & Operational Accounting', 'Risk & Compliance');
+        }
+        if (scores.IRS_UPDATES >= 2) {
+            matchedCategories.push('Tax Services');
+        }
 
         const matchedIndustries = Object.entries(scores)
             .filter(([key, score]) => score >= 1 && Object.keys(INDUSTRIES).includes(key))
             .map(([industry]) => industry);
 
         return {
-            categories: matchedCategories.length ? matchedCategories : ['Other'],
+            categories: matchedCategories.length ? [...new Set(matchedCategories)] : ['Other'],
             industries: matchedIndustries.length ? matchedIndustries : ['General']
         };
     };
@@ -213,21 +261,100 @@ const GreenGator = () => {
         return [...new Set(sources)];
     };
 
+    const fetchRegulatoryData = async () => {
+        try {
+            // SEC EDGAR data
+            const secData = await Promise.all([
+                fetch('https://data.sec.gov/api/xbrl/companyfacts', {
+                    headers: {
+                        'User-Agent': 'GreenGator/1.0 (https://khobster.github.io/greengator/)',
+                        'Accept-Encoding': 'gzip, deflate',
+                        'Host': 'data.sec.gov'
+                    }
+                }).then(res => res.json()).catch(() => []),
+                fetch('https://www.sec.gov/files/company-filings-data/company-facts.zip', {
+                    headers: {
+                        'User-Agent': 'GreenGator/1.0 (https://khobster.github.io/greengator/)',
+                    }
+                }).then(res => res.json()).catch(() => [])
+            ]);
+
+            // IRS data
+            const irsData = await Promise.all([
+                fetch('https://www.irs.gov/api/v1/tax-exempt-organization', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(res => res.json()).catch(() => []),
+                fetch('https://www.irs.gov/api/v1/binary-objects', {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                }).then(res => res.json()).catch(() => [])
+            ]);
+
+            return [...secData.flat(), ...irsData.flat()];
+        } catch (error) {
+            console.error('Regulatory API Error:', error);
+            return [];
+        }
+    };
+
+    const processRegulatoryData = (data) => {
+        return data.map(item => {
+            const text = `${item.title || ''} ${item.description || ''} ${item.formType || ''} ${item.category || ''}`.toLowerCase();
+            
+            // SEC filing processing
+            if (REGULATORY_KEYWORDS.SEC_FILINGS.primary.some(keyword => text.includes(keyword.toLowerCase()))) {
+                return {
+                    title: `${item.formType || 'SEC'} Filing: ${item.companyName || item.title || ''}`,
+                    description: item.description || `New SEC filing for ${item.companyName || ''}`,
+                    date: item.filingDate || item.reportDate || new Date().toISOString(),
+                    link: item.documentUrl || `https://www.sec.gov/Archives/edgar/data/${item.cik || ''}`,
+                    source: 'SEC EDGAR',
+                    categories: ['Technical & Operational Accounting', 'Risk & Compliance'],
+                    industries: categorizeArticle(item).industries
+                };
+            }
+
+            // IRS content processing
+            if (REGULATORY_KEYWORDS.IRS_UPDATES.primary.some(keyword => text.includes(keyword.toLowerCase()))) {
+                return {
+                    title: item.title || 'IRS Update',
+                    description: item.description || item.abstract || 'New IRS guidance available',
+                    date: item.releaseDate || item.lastUpdated || new Date().toISOString(),
+                    link: item.documentUrl || item.link,
+                    source: 'IRS Updates',
+                    categories: ['Tax Services'],
+                    industries: categorizeArticle(item).industries
+                };
+            }
+
+            return null;
+        }).filter(Boolean);
+    };
+
     const fetchNews = async () => {
         setLoading(true);
         setError(null);
         try {
-            const sources = getAllSources();
-            const allNews = await Promise.all(
-                sources.map(source => 
-                    fetch(RSS_PROXY + encodeURIComponent(source))
-                    .then(res => res.json())
-                    .then(data => data.items || [])
-                    .catch(() => [])
+            // Fetch both RSS and regulatory data in parallel
+            const [regulatoryData, rssNews] = await Promise.all([
+                fetchRegulatoryData(),
+                Promise.all(
+                    getAllSources().map(source => 
+                        fetch(RSS_PROXY + encodeURIComponent(source))
+                        .then(res => res.json())
+                        .then(data => data.items || [])
+                        .catch(() => [])
+                    )
                 )
-            );
+            ]);
 
-            const processed = allNews.flat()
+            const processedRegulatory = processRegulatoryData(regulatoryData);
+            
+            // Process RSS news
+            const processedRSS = rssNews.flat()
                 .map(item => {
                     const {categories, industries} = categorizeArticle(item);
                     return {
@@ -239,14 +366,18 @@ const GreenGator = () => {
                         categories,
                         industries
                     };
-                })
+                });
+
+            // Combine and filter all news
+            const allNews = [...processedRegulatory, ...processedRSS]
                 .filter(item => 
                     (selectedCategory === 'all' || item.categories.includes(selectedCategory)) &&
                     (selectedIndustry === 'all' || item.industries.includes(selectedIndustry))
                 );
 
+            // Remove duplicates and sort
             const uniqueNews = Array.from(
-                new Map(processed.map(item => [item.title, item])).values()
+                new Map(allNews.map(item => [item.title, item])).values()
             ).sort((a, b) => new Date(b.date) - new Date(a.date));
 
             setNews(uniqueNews);
@@ -319,7 +450,7 @@ const GreenGator = () => {
                     </div>
                 )}
 
-                    {loading ? (
+                {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
                     </div>
