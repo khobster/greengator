@@ -113,9 +113,9 @@ const GreenGator = () => {
             sources: ['https://www.industryweek.com/rss', 'https://www.manufacturing.net/rss']
         },
         'Media & Entertainment': {
-            keywords: ['media', 'entertainment', 'streaming', 'gaming'],
-            sources: ['https://variety.com/feed/', 'https://www.mediapost.com/rss']
-        },
+    keywords: ['media industry', 'broadcasting business', 'entertainment industry', 'media company'],
+    sources: ['https://www.mediapost.com/rss','https://news.google.com/rss/search?q="media+industry"+OR+"entertainment+business"+OR+"broadcasting+company"+when:7d']
+},
         'Real Estate': {
             keywords: ['real estate', 'property', 'REIT', 'commercial real estate'],
             sources: ['https://www.bisnow.com/feed', 'https://www.globest.com/feed']
@@ -370,17 +370,24 @@ const GreenGator = () => {
 
             // Combine and filter all news
             const allNews = [...processedRegulatory, ...processedRSS]
-                .filter(item => 
-                    (selectedCategory === 'all' || item.categories.includes(selectedCategory)) &&
-                    (selectedIndustry === 'all' || item.industries.includes(selectedIndustry))
-                );
+    .filter(item => {
+        // Skip items only categorized as Other/General
+        if (item.categories.length === 1 && 
+            item.categories[0] === 'Other' && 
+            item.industries.length === 1 && 
+            item.industries[0] === 'General') {
+            return false;
+        }
+        return (selectedCategory === 'all' || item.categories.includes(selectedCategory)) &&
+               (selectedIndustry === 'all' || item.industries.includes(selectedIndustry));
+    });
 
-            // Remove duplicates and sort
-            const uniqueNews = Array.from(
-                new Map(allNews.map(item => [item.title, item])).values()
-            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+// Remove duplicates and sort
+const uniqueNews = Array.from(
+    new Map(allNews.map(item => [item.title, item])).values()
+).sort((a, b) => new Date(b.date) - new Date(a.date));
 
-            setNews(uniqueNews);
+setNews(uniqueNews);
         } catch (error) {
             setError('Failed to fetch news. Please try again later.');
             console.error('Error:', error);
