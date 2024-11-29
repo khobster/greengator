@@ -18,16 +18,55 @@ const GreenGator = () => {
       secondary: ['equity market', 'bond market', 'market capital', 'public offering'],
     },
     'Strategic Finance': {
-      primary: ['financial planning', 'FP&A', 'financial analytics', 'corporate strategy'],
-      secondary: ['financial forecast', 'budget planning', 'strategic planning', 'financial strategy'],
+      primary: [
+        'financial planning',
+        'FP&A',
+        'financial analytics',
+        'corporate strategy',
+        'financial modeling',
+        'data analytics',
+        'business intelligence',
+        'scenario planning',
+        'corporate finance strategy',
+        'performance metrics',
+        'key performance indicators',
+        'KPIs',
+      ],
+      secondary: [
+        'financial forecast',
+        'budget planning',
+        'strategic planning',
+        'financial strategy',
+        'decision support',
+        'financial reporting',
+        'variance analysis',
+      ],
     },
     'ESG & Sustainability': {
       primary: ['ESG', 'sustainability report', 'climate reporting', 'carbon emission'],
       secondary: ['renewable', 'sustainable', 'climate risk', 'environmental impact'],
     },
     'Operational Transformation': {
-      primary: ['process improvement', 'operational efficiency', 'business transformation'],
-      secondary: ['workflow optimization', 'process automation', 'operational excellence'],
+      primary: [
+        'process improvement',
+        'operational efficiency',
+        'business transformation',
+        'process optimization',
+        'change management',
+        'lean operations',
+        'six sigma',
+        'cost reduction',
+        'performance improvement',
+        'operational excellence',
+      ],
+      secondary: [
+        'workflow optimization',
+        'process automation',
+        'continuous improvement',
+        'operational strategy',
+        'efficiency enhancement',
+        'productivity improvement',
+      ],
     },
     'Technology Transformation': {
       primary: ['digital transformation', 'cloud migration', 'enterprise technology'],
@@ -42,8 +81,29 @@ const GreenGator = () => {
       secondary: ['information security', 'cyber risk', 'security breach', 'cyber defense'],
     },
     'Forensic Accounting': {
-      primary: ['fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit'],
-      secondary: ['fraud risk', 'investigation', 'dispute', 'fraud scheme'],
+      primary: [
+        'fraud detection',
+        'forensic investigation',
+        'financial fraud',
+        'forensic audit',
+        'litigation support',
+        'financial disputes',
+        'compliance investigations',
+        'asset misappropriation',
+        'financial statement fraud',
+        'anti-money laundering',
+        'AML',
+        'FCPA violations',
+      ],
+      secondary: [
+        'fraud risk',
+        'investigation',
+        'dispute',
+        'fraud scheme',
+        'regulatory enforcement',
+        'whistleblower',
+        'internal investigation',
+      ],
     },
     'Tax Services': {
       primary: ['tax regulation', 'tax law', 'tax compliance', 'tax reform'],
@@ -54,8 +114,30 @@ const GreenGator = () => {
       secondary: ['cash flow', 'treasury operation', 'payment system', 'banking relationship'],
     },
     'Valuation Services': {
-      primary: ['business valuation', 'fair value', 'asset valuation', 'valuation analysis'],
-      secondary: ['appraisal', 'valuation method', 'market value', 'value assessment'],
+      primary: [
+        'business valuation',
+        'fair value',
+        'asset valuation',
+        'valuation analysis',
+        'purchase price allocation',
+        'goodwill impairment',
+        'intangible assets',
+        'financial instruments valuation',
+        'complex securities',
+        'ASC 820',
+        'ASC 805',
+        'valuation methodologies',
+      ],
+      secondary: [
+        'appraisal',
+        'valuation method',
+        'market value',
+        'value assessment',
+        'discounted cash flow',
+        'DCF',
+        'enterprise value',
+        'equity value',
+      ],
     },
     'Transaction Advisory': {
       primary: ['M&A', 'due diligence', 'merger', 'acquisition'],
@@ -174,6 +256,27 @@ const GreenGator = () => {
       'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
       'https://www.themiddlemarket.com/feed',
       'https://www.dealmarket.com/feed',
+    ],
+    valuation: [
+      'https://www.bvresources.com/rss',
+      'https://www.nacva.com/rss/news.aspx',
+      'https://news.google.com/rss/search?q="business+valuation"+OR+"asset+valuation"+when:90d',
+    ],
+    operational_transformation: [
+      'https://opexsociety.org/feed/',
+      'https://www.processexcellencenetwork.com/rss',
+      'https://news.google.com/rss/search?q="operational+transformation"+OR+"process+optimization"+when:90d',
+    ],
+    forensic_accounting: [
+      'https://www.acfeinsights.com/feed/',
+      'https://www.forensicmag.com/rss-feeds',
+      'https://news.google.com/rss/search?q="forensic+accounting"+OR+"fraud+investigation"+when:90d',
+    ],
+    strategic_finance: [
+      'https://www.cfo.com/feed/',
+      'https://www.financialexecutives.org/FEI-Daily/FEI-Daily-RSS-Feeds.aspx',
+      'https://www.businessintelligenceinfo.com/feed',
+      'https://news.google.com/rss/search?q="strategic+finance"+OR+"financial+planning"+OR+"FP&A"+when:90d',
     ],
     regulatory: {
       sec: [
@@ -483,7 +586,9 @@ const GreenGator = () => {
                     <span className="text-sm text-gray-500">{item.source}</span>
                     <div className="flex items-center space-x-4">
                       <a
-                        href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(item.description + '\n\nRead more here: ' + item.link)}`}
+                        href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(
+                          item.description + '\n\nRead more here: ' + item.link
+                        )}`}
                         className="text-blue-600 hover:text-blue-800 font-medium"
                       >
                         Email Article
