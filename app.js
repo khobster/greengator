@@ -87,7 +87,7 @@ const GreenGator = () => {
   const INDUSTRIES = {
     'Business Services': {
       keywords: ['business services', 'professional services', 'consulting'],
-      sources: ['https://news.google.com/rss/search?q="business+services"+OR+"professional+services"+when:7d'],
+      sources: ['https://news.google.com/rss/search?q="business+services"+OR+"professional+services"+when:30d'],
     },
     Consumer: {
       keywords: ['retail', 'consumer goods', 'e-commerce'],
@@ -117,7 +117,7 @@ const GreenGator = () => {
       keywords: ['media industry', 'broadcasting business', 'entertainment industry', 'media company'],
       sources: [
         'https://www.mediapost.com/rss',
-        'https://news.google.com/rss/search?q="media+industry"+OR+"entertainment+business"+OR+"broadcasting+company"+when:7d',
+        'https://news.google.com/rss/search?q="media+industry"+OR+"entertainment+business"+OR+"broadcasting+company"+when:30d',
       ],
     },
     'Real Estate': {
@@ -136,42 +136,42 @@ const GreenGator = () => {
       'https://www.journalofaccountancy.com/rss/all-news.xml',
       'https://www.ifrs.org/news-and-events/rss-feeds/',
       'https://www.fasb.org/cs/ContentServer?c=Page&pagename=FASB%2FPage%2FSectionPage&cid=1176156316498',
-      'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:7d',
+      'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:30d',
     ],
     markets: [
       'https://www.globalcapital.com/rss/custody-and-clearing.rss',
-      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:7d',
+      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
       'https://feeds.finextra.com/finextra-news-capital-markets.rss',
       'https://www.marketwatch.com/rss/topstories',
     ],
     esg: [
       'https://www.esginvestor.net/feed/',
       'https://www.esgtoday.com/feed/',
-      'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:7d',
+      'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:30d',
     ],
     tech: [
       'https://feeds.feedburner.com/TheHackersNews',
       'https://www.darkreading.com/rss.xml',
       'https://www.csoonline.com/index.rss',
-      'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:7d',
+      'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:30d',
     ],
     tax: [
       'https://www.irs.gov/newsroom/feed',
-      'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:7d',
+      'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:30d',
       'https://www.taxnotes.com/feed',
     ],
     treasury: [
-      'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:7d',
+      'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:30d',
       'https://www.gtnews.com/feed/',
       'https://www.treasury-management.com/rss/news.php',
     ],
     workforce: [
-      'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:7d',
+      'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:30d',
       'https://www.shrm.org/rss/pages/rss.aspx',
       'https://www.hcamag.com/feed',
     ],
     ma: [
-      'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:7d',
+      'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
       'https://www.themiddlemarket.com/feed',
       'https://www.dealmarket.com/feed',
     ],
