@@ -1,5 +1,3 @@
-import React from 'react';
-
 const GreenGator = () => {
   const [news, setNews] = React.useState([]);
   const [selectedCategory, setSelectedCategory] = React.useState('all');
@@ -502,4 +500,5 @@ const GreenGator = () => {
   );
 };
 
-export default GreenGator;
+// Remove the export statement and instead render the component directly
+ReactDOM.render(<GreenGator />, document.getElementById('root'));
