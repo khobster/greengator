@@ -5,6 +5,7 @@ const GreenGator = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [newUpdates, setNewUpdates] = React.useState(false);
+  const [recipientEmail, setRecipientEmail] = React.useState('');
 
   const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
@@ -379,6 +380,30 @@ const GreenGator = () => {
     return () => clearInterval(interval);
   }, [selectedCategory, selectedIndustry]);
 
+  // Add the sendEmail function
+  const sendEmail = (article) => {
+    if (!recipientEmail) {
+      alert('Please enter a recipient email address.');
+      return;
+    }
+
+    const emailParams = {
+      title: article.title,
+      description: article.description,
+      link: article.link,
+      recipient_email: recipientEmail,
+    };
+
+    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', emailParams)
+      .then((response) => {
+        console.log('Email sent successfully!', response.status, response.text);
+        alert('Email sent successfully!');
+      }, (error) => {
+        console.error('Failed to send email:', error);
+        alert('Failed to send email. Please try again.');
+      });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -396,6 +421,18 @@ const GreenGator = () => {
               {loading ? 'Refreshing...' : 'Refresh News'}
             </button>
           </div>
+        </div>
+
+        {/* Recipient Email Input */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Recipient Email</label>
+          <input
+            type="email"
+            className="w-full p-2 border rounded-lg"
+            value={recipientEmail}
+            onChange={(e) => setRecipientEmail(e.target.value)}
+            placeholder="Enter recipient email"
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
@@ -481,14 +518,22 @@ const GreenGator = () => {
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">{item.source}</span>
-                    <a
-                      href={item.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-green-600 hover:text-green-800 font-medium"
-                    >
-                      Read More →
-                    </a>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => sendEmail(item)}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Email Article
+                      </button>
+                      <a
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800 font-medium"
+                      >
+                        Read More →
+                      </a>
+                    </div>
                   </div>
                 </div>
               ))
@@ -500,5 +545,5 @@ const GreenGator = () => {
   );
 };
 
-// Remove the export statement and instead render the component directly
+// Render the component
 ReactDOM.render(<GreenGator />, document.getElementById('root'));
