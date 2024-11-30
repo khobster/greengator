@@ -173,38 +173,56 @@ const GreenGator = () => {
     },
     Consumer: {
       keywords: ['retail', 'consumer goods', 'e-commerce'],
-      sources: ['https://www.retaildive.com/rss/news/', 'https://www.consumergoods.com/rss.xml'],
+      sources: [
+        'https://www.consumergoods.com/rss.xml',
+        'https://news.google.com/rss/search?q=retail+OR+"consumer+goods"+OR+e-commerce+when:30d',
+      ],
     },
     'Energy & Utilities': {
       keywords: ['energy', 'utilities', 'power', 'renewable energy'],
-      sources: ['https://www.utilitydive.com/rss/news/', 'https://www.renewableenergyworld.com/feed/'],
+      sources: [
+        'https://www.renewableenergyworld.com/feed/',
+        'https://news.google.com/rss/search?q=energy+OR+utilities+OR+"renewable+energy"+when:30d',
+      ],
     },
     'Financial Services': {
       keywords: ['banking', 'insurance', 'fintech', 'asset management'],
-      sources: ['https://www.bankingdive.com/rss/news/', 'https://www.insurancejournal.com/feed/'],
+      sources: [
+        'https://www.insurancejournal.com/feed/',
+        'https://news.google.com/rss/search?q=banking+OR+insurance+OR+fintech+OR+"asset+management"+when:30d',
+      ],
     },
     Healthcare: {
       keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
-      sources: ['https://www.healthcaredive.com/rss/news/', 'https://www.modernhealthcare.com/rss'],
+      sources: [
+        'https://www.modernhealthcare.com/rss',
+        'https://news.google.com/rss/search?q=healthcare+OR+hospitals+OR+medical+OR+"health+insurance"+when:30d',
+      ],
     },
     'Life Sciences': {
       keywords: ['pharmaceutical', 'biotech', 'life sciences', 'medical devices'],
-      sources: ['https://www.biopharmadive.com/rss/news/', 'https://www.fiercebiotech.com/rss'],
+      sources: [
+        'https://www.fiercebiotech.com/rss',
+        'https://news.google.com/rss/search?q=pharmaceutical+OR+biotech+OR+"life+sciences"+OR+"medical+devices"+when:30d',
+      ],
     },
     Manufacturing: {
       keywords: ['manufacturing', 'industrial', 'production', 'supply chain'],
-      sources: ['https://www.industryweek.com/rss', 'https://www.manufacturing.net/rss'],
+      sources: [
+        'https://news.google.com/rss/search?q=manufacturing+OR+industrial+OR+production+OR+"supply+chain"+when:30d',
+      ],
     },
     'Media & Entertainment': {
       keywords: ['media industry', 'broadcasting business', 'entertainment industry', 'media company'],
       sources: [
-        'https://www.mediapost.com/rss',
         'https://news.google.com/rss/search?q="media+industry"+OR+"entertainment+business"+OR+"broadcasting+company"+when:30d',
       ],
     },
     'Real Estate': {
       keywords: ['real estate', 'property', 'REIT', 'commercial real estate'],
-      sources: ['https://www.bisnow.com/feed', 'https://www.globest.com/feed'],
+      sources: [
+        'https://news.google.com/rss/search?q="real+estate"+OR+property+OR+REIT+OR+"commercial+real+estate"+when:30d',
+      ],
     },
     'Software & Tech': {
       keywords: ['technology', 'software', 'SaaS', 'cloud computing'],
@@ -214,17 +232,15 @@ const GreenGator = () => {
 
   const NEWS_SOURCES = {
     accounting: [
-      'https://www.accountingtoday.com/feed',
+      'https://www.accountingtoday.com/rss',
       'https://www.journalofaccountancy.com/rss/all-news.xml',
-      'https://www.ifrs.org/news-and-events/rss-feeds/',
-      'https://www.fasb.org/cs/ContentServer?c=Page&pagename=FASB%2FPage%2FSectionPage&cid=1176156316498',
+      'https://www.ifrs.org/news-and-events/updates/rss.xml',
+      'https://www.fasb.org/jsp/rss/rss.jsp?rssFeed=FASB_News_Releases',
       'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:30d',
     ],
     markets: [
-      'https://www.globalcapital.com/rss/custody-and-clearing.rss',
-      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
-      'https://feeds.finextra.com/finextra-news-capital-markets.rss',
       'https://www.marketwatch.com/rss/topstories',
+      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
     ],
     esg: [
       'https://www.esginvestor.net/feed/',
@@ -234,48 +250,36 @@ const GreenGator = () => {
     tech: [
       'https://feeds.feedburner.com/TheHackersNews',
       'https://www.darkreading.com/rss.xml',
-      'https://www.csoonline.com/index.rss',
       'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:30d',
     ],
     tax: [
-      'https://www.irs.gov/newsroom/feed',
+      'https://www.irs.gov/newsroom/rss',
       'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:30d',
-      'https://www.taxnotes.com/feed',
     ],
     treasury: [
       'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:30d',
-      'https://www.gtnews.com/feed/',
       'https://www.treasury-management.com/rss/news.php',
     ],
     workforce: [
       'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:30d',
       'https://www.shrm.org/rss/pages/rss.aspx',
-      'https://www.hcamag.com/feed',
     ],
     ma: [
       'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
-      'https://www.themiddlemarket.com/feed',
       'https://www.dealmarket.com/feed',
     ],
     valuation: [
-      'https://www.bvresources.com/rss',
-      'https://www.nacva.com/rss/news.aspx',
       'https://news.google.com/rss/search?q="business+valuation"+OR+"asset+valuation"+when:90d',
     ],
     operational_transformation: [
       'https://opexsociety.org/feed/',
-      'https://www.processexcellencenetwork.com/rss',
       'https://news.google.com/rss/search?q="operational+transformation"+OR+"process+optimization"+when:90d',
     ],
     forensic_accounting: [
       'https://www.acfeinsights.com/feed/',
-      'https://www.forensicmag.com/rss-feeds',
       'https://news.google.com/rss/search?q="forensic+accounting"+OR+"fraud+investigation"+when:90d',
     ],
     strategic_finance: [
-      'https://www.cfo.com/feed/',
-      'https://www.financialexecutives.org/FEI-Daily/FEI-Daily-RSS-Feeds.aspx',
-      'https://www.businessintelligenceinfo.com/feed',
       'https://news.google.com/rss/search?q="strategic+finance"+OR+"financial+planning"+OR+"FP&A"+when:90d',
     ],
     regulatory: {
@@ -283,7 +287,7 @@ const GreenGator = () => {
         'https://www.sec.gov/news/pressreleases.rss',
         'https://www.sec.gov/news/financial-reporting-alerts/rss',
       ],
-      irs: ['https://www.irs.gov/newsroom/feed'],
+      irs: ['https://www.irs.gov/newsroom/rss'],
     },
   };
 
@@ -358,7 +362,7 @@ const GreenGator = () => {
       const secItems = secData.items || [];
 
       // IRS RSS Feed
-      const irsRssUrl = 'https://www.irs.gov/newsroom/feed';
+      const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
       const irsResponse = await fetch(RSS_PROXY + encodeURIComponent(irsRssUrl));
       const irsData = await irsResponse.json();
       const irsItems = irsData.items || [];
@@ -415,9 +419,17 @@ const GreenGator = () => {
         Promise.all(
           getAllSources().map((source) =>
             fetch(RSS_PROXY + encodeURIComponent(source))
-              .then((res) => res.json())
+              .then((res) => {
+                if (!res.ok) {
+                  throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+              })
               .then((data) => data.items || [])
-              .catch(() => [])
+              .catch((error) => {
+                console.error(`Error fetching ${source}:`, error);
+                return [];
+              })
           )
         ),
         fetchRegulatoryData(),
