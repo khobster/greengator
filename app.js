@@ -378,9 +378,7 @@ const GreenGator = () => {
   const processRegulatoryData = (data) => {
     return data
       .map((item) => {
-        const text = `${item.title || ''} ${item.description || ''}`.toLowerCase();
-
-        // Identify source based on link or title
+        // Identify source based on link
         const isSEC = item.link && item.link.includes('sec.gov');
         const isIRS = item.link && item.link.includes('irs.gov');
 
@@ -510,10 +508,7 @@ const GreenGator = () => {
     const subject = 'Selected Articles from GreenGator';
     const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
     const body = selectedArticleObjects
-      .map(
-        (item) =>
-          `${item.title}\n${item.description}\nRead more here: ${item.link}\n\n`
-      )
+      .map((item) => `${item.title}\nRead more here: ${item.link}\n\n`)
       .join('');
     const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
