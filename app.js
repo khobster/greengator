@@ -495,20 +495,21 @@ const GreenGator = () => {
     return () => clearInterval(interval);
   }, [selectedCategory, selectedIndustry]);
 
-  // Add the functions for article selection
+  // Updated functions for article selection
   const toggleArticleSelection = (article) => {
     setSelectedArticles((prevSelected) => {
-      if (prevSelected.includes(article)) {
-        return prevSelected.filter((a) => a !== article);
+      if (prevSelected.includes(article.link)) {
+        return prevSelected.filter((link) => link !== article.link);
       } else {
-        return [...prevSelected, article];
+        return [...prevSelected, article.link];
       }
     });
   };
 
   const emailSelectedArticles = () => {
     const subject = 'Selected Articles from GreenGator';
-    const body = selectedArticles
+    const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
+    const body = selectedArticleObjects
       .map(
         (item) =>
           `${item.title}\n${item.description}\nRead more here: ${item.link}\n\n`
@@ -523,13 +524,13 @@ const GreenGator = () => {
     }
   };
 
-  const allSelected = news.length > 0 && selectedArticles.length === news.length;
+  const allSelected = news.length > 0 && news.every((item) => selectedArticles.includes(item.link));
 
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedArticles([]);
     } else {
-      setSelectedArticles(news);
+      setSelectedArticles(news.map((item) => item.link));
     }
   };
 
@@ -667,7 +668,7 @@ const GreenGator = () => {
                       <label className="inline-flex items-center">
                         <input
                           type="checkbox"
-                          checked={selectedArticles.includes(item)}
+                          checked={selectedArticles.includes(item.link)}
                           onChange={() => toggleArticleSelection(item)}
                           className="form-checkbox h-5 w-5 text-green-600"
                         />
