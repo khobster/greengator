@@ -5,6 +5,7 @@ const GreenGator = () => {
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [newUpdates, setNewUpdates] = React.useState(false);
+  const [selectedArticles, setSelectedArticles] = React.useState([]);
 
   const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
@@ -494,6 +495,44 @@ const GreenGator = () => {
     return () => clearInterval(interval);
   }, [selectedCategory, selectedIndustry]);
 
+  // Add the functions for article selection
+  const toggleArticleSelection = (article) => {
+    setSelectedArticles((prevSelected) => {
+      if (prevSelected.includes(article)) {
+        return prevSelected.filter((a) => a !== article);
+      } else {
+        return [...prevSelected, article];
+      }
+    });
+  };
+
+  const emailSelectedArticles = () => {
+    const subject = 'Selected Articles from GreenGator';
+    const body = selectedArticles
+      .map(
+        (item) =>
+          `${item.title}\n${item.description}\nRead more here: ${item.link}\n\n`
+      )
+      .join('');
+    const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    if (mailtoLink.length > 2000) {
+      alert('The selected articles are too long to send in one email.');
+    } else {
+      window.location.href = mailtoLink;
+    }
+  };
+
+  const allSelected = news.length > 0 && selectedArticles.length === news.length;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedArticles([]);
+    } else {
+      setSelectedArticles(news);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -513,7 +552,7 @@ const GreenGator = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Line</label>
             <select
@@ -548,6 +587,33 @@ const GreenGator = () => {
             </select>
           </div>
         </div>
+
+        {/* Add the Select All checkbox */}
+        {news.length > 0 && (
+          <div className="mb-4">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                className="form-checkbox h-5 w-5 text-green-600"
+              />
+              <span className="ml-2 text-gray-700">Select All</span>
+            </label>
+          </div>
+        )}
+
+        {/* Add the Email Selected Articles button */}
+        {selectedArticles.length > 0 && (
+          <div className="mb-4">
+            <button
+              onClick={emailSelectedArticles}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Email Selected Articles ({selectedArticles.length})
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>
@@ -597,6 +663,16 @@ const GreenGator = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">{item.source}</span>
                     <div className="flex items-center space-x-4">
+                      {/* Add the checkbox for selection */}
+                      <label className="inline-flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedArticles.includes(item)}
+                          onChange={() => toggleArticleSelection(item)}
+                          className="form-checkbox h-5 w-5 text-green-600"
+                        />
+                        <span className="ml-2 text-gray-700">Select</span>
+                      </label>
                       <a
                         href={`mailto:?subject=${encodeURIComponent(item.title)}&body=${encodeURIComponent(
                           item.description + '\n\nRead more here: ' + item.link
