@@ -8,7 +8,7 @@ const GreenGator = () => {
   const [selectedArticles, setSelectedArticles] = React.useState([]);
   const [includeBig4, setIncludeBig4] = React.useState(false);
 
-  // Use your Firebase Cloud Function endpoint instead of rss2json.com
+  // Using your Firebase Cloud Function endpoint instead of rss2json.com
   const RSS_PROXY = 'https://us-central1-greengatorproxy.cloudfunctions.net/fetchRss?url=';
 
   const KEYWORD_WEIGHTS = {
@@ -188,6 +188,68 @@ const GreenGator = () => {
     'Software & Tech': {
       keywords: ['technology', 'software', 'SaaS', 'cloud computing'],
       sources: ['https://techcrunch.com/feed/', 'https://www.zdnet.com/rss.xml'],
+    },
+  };
+
+  // RE-ADD NEWS_SOURCES HERE
+  const NEWS_SOURCES = {
+    accounting: [
+      'https://www.accountingtoday.com/rss',
+      'https://www.journalofaccountancy.com/rss/all-news.xml',
+      'https://www.ifrs.org/news-and-events/updates/rss.xml',
+      'https://www.fasb.org/jsp/rss/rss.jsp?rssFeed=FASB_News_Releases',
+      'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:30d',
+    ],
+    markets: [
+      'https://www.marketwatch.com/rss/topstories',
+      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
+    ],
+    esg: [
+      'https://www.esginvestor.net/feed/',
+      'https://www.esgtoday.com/feed/',
+      'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:30d',
+    ],
+    tech: [
+      'https://feeds.feedburner.com/TheHackersNews',
+      'https://www.darkreading.com/rss.xml',
+      'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:30d',
+    ],
+    tax: [
+      'https://www.irs.gov/newsroom/rss',
+      'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:30d',
+    ],
+    treasury: [
+      'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:30d',
+      'https://www.treasury-management.com/rss/news.php',
+    ],
+    workforce: [
+      'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:30d',
+      'https://www.shrm.org/rss/pages/rss.aspx',
+    ],
+    ma: [
+      'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
+      'https://www.dealmarket.com/feed',
+    ],
+    valuation: [
+      'https://news.google.com/rss/search?q="business+valuation"+OR+"asset+valuation"+when:90d',
+    ],
+    operational_transformation: [
+      'https://opexsociety.org/feed/',
+      'https://news.google.com/rss/search?q="operational+transformation"+OR+"process+optimization"+when:90d',
+    ],
+    forensic_accounting: [
+      'https://www.acfeinsights.com/feed/',
+      'https://news.google.com/rss/search?q="forensic+accounting"+OR+"fraud+investigation"+when:90d',
+    ],
+    strategic_finance: [
+      'https://news.google.com/rss/search?q="strategic+finance"+OR+"financial+planning"+OR+"FP&A"+when:90d',
+    ],
+    regulatory: {
+      sec: [
+        'https://www.sec.gov/news/pressreleases.rss',
+        'https://www.sec.gov/news/financial-reporting-alerts/rss',
+      ],
+      irs: ['https://www.irs.gov/newsroom/rss'],
     },
   };
 
