@@ -190,18 +190,6 @@ const GreenGator = () => {
     },
   };
 
-  // Direct RSS feeds for Big 4 press releases/news:
-  const BIG4_SOURCES = [
-    // PwC US Press Releases
-    'https://www.pwc.com/us/en/feeds/rss/press-releases.xml',
-    // Deloitte US Press Releases
-    'https://www2.deloitte.com/content/dam/Deloitte/us/RSS-Feeds/deloitte-us-press-releases-feed.xml',
-    // KPMG (Global Press Releases)
-    'https://home.kpmg/xx/en/home/insights/feeds/press-releases.xml',
-    // EY Global Press Releases
-    'https://www.ey.com/en_gl/rss/Press-releases'
-  ];
-
   const NEWS_SOURCES = {
     accounting: [
       'https://www.accountingtoday.com/rss',
@@ -262,6 +250,26 @@ const GreenGator = () => {
       irs: ['https://www.irs.gov/newsroom/rss'],
     },
   };
+
+  // Example Big 4 feeds (Press releases + insights):
+  // Replace these with actual firm feeds you find.
+  const BIG4_SOURCES = [
+    // PwC feeds
+    'https://www.pwc.com/us/en/feeds/rss/press-releases.xml',         // PwC press releases example
+    'https://www.pwc.com/us/en/feeds/rss/insights.xml',               // PwC insights (example)
+    
+    // Deloitte feeds
+    'https://www2.deloitte.com/content/dam/Deloitte/us/RSS-Feeds/deloitte-us-press-releases-feed.xml', // Deloitte press releases example
+    'https://www2.deloitte.com/us/en/insights/rss.xml',               // Deloitte insights (example)
+    
+    // KPMG feeds
+    'https://home.kpmg/xx/en/home/insights/feeds/press-releases.xml', // KPMG global press releases (example)
+    'https://home.kpmg/xx/en/home/insights/rss.xml',                  // KPMG insights (example)
+    
+    // EY feeds
+    'https://www.ey.com/en_gl/rss/Press-releases',                    // EY global press releases
+    'https://www.ey.com/en_gl/rss/Insights'                           // EY insights (example)
+  ];
 
   const categorizeArticle = (article) => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
@@ -422,7 +430,7 @@ const GreenGator = () => {
 
       let allNews = [...processedRegulatory, ...processedRSS];
 
-      // If Big4 is ON, do not filter out Other/General articles.
+      // If Big4 is ON, do NOT filter out Other/General.
       if (!includeBig4) {
         allNews = allNews.filter((item) => {
           if (
