@@ -24,11 +24,11 @@ const GreenGator = () => {
         'financial planning', 'FP&A', 'financial analytics', 'corporate strategy',
         'financial modeling', 'data analytics', 'business intelligence',
         'scenario planning', 'corporate finance strategy', 'performance metrics',
-        'key performance indicators', 'KPIs',
+        'key performance indicators', 'KPIs'
       ],
       secondary: [
         'financial forecast', 'budget planning', 'strategic planning', 'financial strategy',
-        'decision support', 'financial reporting', 'variance analysis',
+        'decision support', 'financial reporting', 'variance analysis'
       ],
     },
     'ESG & Sustainability': {
@@ -39,11 +39,11 @@ const GreenGator = () => {
       primary: [
         'process improvement', 'operational efficiency', 'business transformation',
         'process optimization', 'change management', 'lean operations', 'six sigma',
-        'cost reduction', 'performance improvement', 'operational excellence',
+        'cost reduction', 'performance improvement', 'operational excellence'
       ],
       secondary: [
         'workflow optimization', 'process automation', 'continuous improvement',
-        'operational strategy', 'efficiency enhancement', 'productivity improvement',
+        'operational strategy', 'efficiency enhancement', 'productivity improvement'
       ],
     },
     'Technology Transformation': {
@@ -62,11 +62,11 @@ const GreenGator = () => {
       primary: [
         'fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit',
         'litigation support', 'financial disputes', 'compliance investigations', 'asset misappropriation',
-        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations',
+        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations'
       ],
       secondary: [
         'fraud risk', 'investigation', 'dispute', 'fraud scheme', 'regulatory enforcement',
-        'whistleblower', 'internal investigation',
+        'whistleblower', 'internal investigation'
       ],
     },
     'Tax Services': {
@@ -82,11 +82,11 @@ const GreenGator = () => {
         'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
         'purchase price allocation', 'goodwill impairment', 'intangible assets',
         'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
-        'valuation methodologies',
+        'valuation methodologies'
       ],
       secondary: [
         'appraisal', 'valuation method', 'market value', 'value assessment',
-        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
+        'discounted cash flow', 'DCF', 'enterprise value', 'equity value'
       ],
     },
     'Transaction Advisory': {
@@ -190,7 +190,68 @@ const GreenGator = () => {
     },
   };
 
-  // Big 4 sources - We'll only fetch these if the toggle is on
+  // NEWS_SOURCES re-added here
+  const NEWS_SOURCES = {
+    accounting: [
+      'https://www.accountingtoday.com/rss',
+      'https://www.journalofaccountancy.com/rss/all-news.xml',
+      'https://www.ifrs.org/news-and-events/updates/rss.xml',
+      'https://www.fasb.org/jsp/rss/rss.jsp?rssFeed=FASB_News_Releases',
+      'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:30d',
+    ],
+    markets: [
+      'https://www.marketwatch.com/rss/topstories',
+      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
+    ],
+    esg: [
+      'https://www.esginvestor.net/feed/',
+      'https://www.esgtoday.com/feed/',
+      'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:30d',
+    ],
+    tech: [
+      'https://feeds.feedburner.com/TheHackersNews',
+      'https://www.darkreading.com/rss.xml',
+      'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:30d',
+    ],
+    tax: [
+      'https://www.irs.gov/newsroom/rss',
+      'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:30d',
+    ],
+    treasury: [
+      'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:30d',
+      'https://www.treasury-management.com/rss/news.php',
+    ],
+    workforce: [
+      'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:30d',
+      'https://www.shrm.org/rss/pages/rss.aspx',
+    ],
+    ma: [
+      'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
+      'https://www.dealmarket.com/feed',
+    ],
+    valuation: [
+      'https://news.google.com/rss/search?q="business+valuation"+OR+"asset+valuation"+when:90d',
+    ],
+    operational_transformation: [
+      'https://opexsociety.org/feed/',
+      'https://news.google.com/rss/search?q="operational+transformation"+OR+"process+optimization"+when:90d',
+    ],
+    forensic_accounting: [
+      'https://www.acfeinsights.com/feed/',
+      'https://news.google.com/rss/search?q="forensic+accounting"+OR+"fraud+investigation"+when:90d',
+    ],
+    strategic_finance: [
+      'https://news.google.com/rss/search?q="strategic+finance"+OR+"financial+planning"+OR+"FP&A"+when:90d',
+    ],
+    regulatory: {
+      sec: [
+        'https://www.sec.gov/news/pressreleases.rss',
+        'https://www.sec.gov/news/financial-reporting-alerts/rss',
+      ],
+      irs: ['https://www.irs.gov/newsroom/rss'],
+    },
+  };
+
   const BIG4_SOURCES = [
     'https://news.google.com/rss/search?q=PwC+OR+Deloitte+OR+KPMG+OR+EY+when:30d'
   ];
@@ -199,7 +260,6 @@ const GreenGator = () => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
     const scores = {};
 
-    // Score regular categories
     Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
       scores[category] = 0;
       weights.primary.forEach((keyword) => {
@@ -210,7 +270,6 @@ const GreenGator = () => {
       });
     });
 
-    // Score industries
     Object.entries(INDUSTRIES).forEach(([industry, data]) => {
       scores[industry] = 0;
       data.keywords.forEach((keyword) => {
@@ -218,7 +277,6 @@ const GreenGator = () => {
       });
     });
 
-    // Special handling for SEC and IRS
     if (article.source === 'SEC EDGAR') {
       scores['Technical & Operational Accounting'] = 2;
       scores['Risk & Compliance'] = 2;
@@ -248,12 +306,10 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    // If Big 4 toggle is on, ONLY fetch Big 4 sources
     if (includeBig4) {
       return BIG4_SOURCES;
     }
 
-    // Otherwise, fetch normal sources
     let sources = [
       ...Object.values(NEWS_SOURCES)
         .filter((value) => Array.isArray(value))
@@ -500,7 +556,6 @@ const GreenGator = () => {
             </select>
           </div>
 
-          {/* Big 4 Toggle */}
           <div className="flex items-center space-x-2 mt-6">
             <input
               type="checkbox"
