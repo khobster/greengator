@@ -117,6 +117,8 @@ const GreenGator = () => {
     },
   };
 
+  const CATEGORIES = Object.keys(KEYWORD_WEIGHTS);
+
   const INDUSTRIES = {
     'Business Services': {
       keywords: ['business services', 'professional services', 'consulting'],
@@ -401,7 +403,7 @@ const GreenGator = () => {
         regulatoryData = await fetchRegulatoryData();
       }
 
-      // If Big 4 mode is on, use Firebase proxy; otherwise, use rss2json
+      // If Big4 is on, use Firebase proxy. Otherwise, rss2json
       if (includeBig4) {
         rssNews = await fetchFeeds(sources, true);
       } else {
@@ -617,7 +619,15 @@ const GreenGator = () => {
                         <input
                           type="checkbox"
                           checked={selectedArticles.includes(item.link)}
-                          onChange={() => toggleArticleSelection(item)}
+                          onChange={() => {
+                            setSelectedArticles(prevSelected => {
+                              if (prevSelected.includes(item.link)) {
+                                return prevSelected.filter(link => link !== item.link);
+                              } else {
+                                return [...prevSelected, item.link];
+                              }
+                            });
+                          }}
                           className="form-checkbox h-5 w-5 text-green-600"
                         />
                         <span className="ml-2 text-gray-700">Select</span>
