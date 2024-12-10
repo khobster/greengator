@@ -6,10 +6,8 @@ const GreenGator = () => {
   const [error, setError] = React.useState(null);
   const [newUpdates, setNewUpdates] = React.useState(false);
   const [selectedArticles, setSelectedArticles] = React.useState([]);
-  const [includeBig4, setIncludeBig4] = React.useState(false);
 
-  // Using your Firebase Cloud Function endpoint instead of rss2json.com
-  const RSS_PROXY = 'https://us-central1-greengatorproxy.cloudfunctions.net/fetchRss?url=';
+  const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
   const KEYWORD_WEIGHTS = {
     'Technical & Operational Accounting': {
@@ -22,14 +20,27 @@ const GreenGator = () => {
     },
     'Strategic Finance': {
       primary: [
-        'financial planning', 'FP&A', 'financial analytics', 'corporate strategy',
-        'financial modeling', 'data analytics', 'business intelligence',
-        'scenario planning', 'corporate finance strategy', 'performance metrics',
-        'key performance indicators', 'KPIs',
+        'financial planning',
+        'FP&A',
+        'financial analytics',
+        'corporate strategy',
+        'financial modeling',
+        'data analytics',
+        'business intelligence',
+        'scenario planning',
+        'corporate finance strategy',
+        'performance metrics',
+        'key performance indicators',
+        'KPIs',
       ],
       secondary: [
-        'financial forecast', 'budget planning', 'strategic planning', 'financial strategy',
-        'decision support', 'financial reporting', 'variance analysis',
+        'financial forecast',
+        'budget planning',
+        'strategic planning',
+        'financial strategy',
+        'decision support',
+        'financial reporting',
+        'variance analysis',
       ],
     },
     'ESG & Sustainability': {
@@ -38,13 +49,24 @@ const GreenGator = () => {
     },
     'Operational Transformation': {
       primary: [
-        'process improvement', 'operational efficiency', 'business transformation',
-        'process optimization', 'change management', 'lean operations', 'six sigma',
-        'cost reduction', 'performance improvement', 'operational excellence',
+        'process improvement',
+        'operational efficiency',
+        'business transformation',
+        'process optimization',
+        'change management',
+        'lean operations',
+        'six sigma',
+        'cost reduction',
+        'performance improvement',
+        'operational excellence',
       ],
       secondary: [
-        'workflow optimization', 'process automation', 'continuous improvement',
-        'operational strategy', 'efficiency enhancement', 'productivity improvement',
+        'workflow optimization',
+        'process automation',
+        'continuous improvement',
+        'operational strategy',
+        'efficiency enhancement',
+        'productivity improvement',
       ],
     },
     'Technology Transformation': {
@@ -61,13 +83,27 @@ const GreenGator = () => {
     },
     'Forensic Accounting': {
       primary: [
-        'fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit',
-        'litigation support', 'financial disputes', 'compliance investigations', 'asset misappropriation',
-        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations',
+        'fraud detection',
+        'forensic investigation',
+        'financial fraud',
+        'forensic audit',
+        'litigation support',
+        'financial disputes',
+        'compliance investigations',
+        'asset misappropriation',
+        'financial statement fraud',
+        'anti-money laundering',
+        'AML',
+        'FCPA violations',
       ],
       secondary: [
-        'fraud risk', 'investigation', 'dispute', 'fraud scheme', 'regulatory enforcement',
-        'whistleblower', 'internal investigation',
+        'fraud risk',
+        'investigation',
+        'dispute',
+        'fraud scheme',
+        'regulatory enforcement',
+        'whistleblower',
+        'internal investigation',
       ],
     },
     'Tax Services': {
@@ -80,22 +116,32 @@ const GreenGator = () => {
     },
     'Valuation Services': {
       primary: [
-        'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
-        'purchase price allocation', 'goodwill impairment', 'intangible assets',
-        'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
+        'business valuation',
+        'fair value',
+        'asset valuation',
+        'valuation analysis',
+        'purchase price allocation',
+        'goodwill impairment',
+        'intangible assets',
+        'financial instruments valuation',
+        'complex securities',
+        'ASC 820',
+        'ASC 805',
         'valuation methodologies',
       ],
       secondary: [
-        'appraisal', 'valuation method', 'market value', 'value assessment',
-        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
+        'appraisal',
+        'valuation method',
+        'market value',
+        'value assessment',
+        'discounted cash flow',
+        'DCF',
+        'enterprise value',
+        'equity value',
       ],
     },
     'Transaction Advisory': {
       primary: ['M&A', 'due diligence', 'merger', 'acquisition'],
-      secondary: ['deal advisory', 'transaction support', 'deal value', 'deal structure'],
-    },
-    'M&A': {
-      primary: ['M&A', 'merger and acquisition', 'merger', 'acquisition'],
       secondary: ['deal advisory', 'transaction support', 'deal value', 'deal structure'],
     },
     'Workforce Transformation': {
@@ -146,12 +192,6 @@ const GreenGator = () => {
         'https://www.insurancejournal.com/feed/',
         'https://news.google.com/rss/search?q=banking+OR+insurance+OR+fintech+OR+"asset+management"+when:30d',
       ],
-    },
-    'Banking': {
-      keywords: ['bank', 'banking', 'loan', 'credit', 'lending'],
-      sources: [
-        'https://news.google.com/rss/search?q=bank+OR+banking+OR+loan+OR+credit+OR+lending+when:30d'
-      ]
     },
     Healthcare: {
       keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
@@ -252,17 +292,11 @@ const GreenGator = () => {
     },
   };
 
-  const BIG4_SOURCES = [
-    'https://rss.app/feeds/RXmiGOBWPMg9xdmA.xml',
-    'https://rss.app/feeds/fR519PfuWAHfWltI.xml',
-    'https://rss.app/feeds/HgOktHgpDtDm9YDf.xml',
-    'https://rss.app/feeds/kqcC60e2jDp4lzkI.xml'
-  ];
-
   const categorizeArticle = (article) => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
     const scores = {};
 
+    // Score regular categories
     Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
       scores[category] = 0;
       weights.primary.forEach((keyword) => {
@@ -273,6 +307,7 @@ const GreenGator = () => {
       });
     });
 
+    // Score industries
     Object.entries(INDUSTRIES).forEach(([industry, data]) => {
       scores[industry] = 0;
       data.keywords.forEach((keyword) => {
@@ -280,6 +315,7 @@ const GreenGator = () => {
       });
     });
 
+    // Special handling for SEC and IRS
     if (article.source === 'SEC EDGAR') {
       scores['Technical & Operational Accounting'] = 2;
       scores['Risk & Compliance'] = 2;
@@ -309,29 +345,25 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    if (includeBig4) {
-      return BIG4_SOURCES;
-    }
-
-    let sources = [
+    const sources = [
       ...Object.values(NEWS_SOURCES)
         .filter((value) => Array.isArray(value))
         .flat(),
       ...Object.values(INDUSTRIES).flatMap((industry) => industry.sources),
     ];
-
     return [...new Set(sources)];
   };
 
   const fetchRegulatoryData = async () => {
     try {
+      // SEC RSS Feed
       const secRssUrl = 'https://www.sec.gov/news/pressreleases.rss';
-      const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
-
       const secResponse = await fetch(RSS_PROXY + encodeURIComponent(secRssUrl));
       const secData = await secResponse.json();
       const secItems = secData.items || [];
 
+      // IRS RSS Feed
+      const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
       const irsResponse = await fetch(RSS_PROXY + encodeURIComponent(irsRssUrl));
       const irsData = await irsResponse.json();
       const irsItems = irsData.items || [];
@@ -346,6 +378,7 @@ const GreenGator = () => {
   const processRegulatoryData = (data) => {
     return data
       .map((item) => {
+        // Identify source based on link
         const isSEC = item.link && item.link.includes('sec.gov');
         const isIRS = item.link && item.link.includes('irs.gov');
 
@@ -380,31 +413,23 @@ const GreenGator = () => {
     setLoading(true);
     setError(null);
     try {
-      let regulatoryData = [];
-      if (!includeBig4) {
-        regulatoryData = await fetchRegulatoryData();
-      }
+      // Fetch both RSS and regulatory data in parallel
+      const [regulatoryData, rssNews] = await Promise.all([
+        fetchRegulatoryData(),
+        Promise.all(
+          getAllSources().map(source =>
+            fetch(RSS_PROXY + encodeURIComponent(source))
+              .then(res => res.json())
+              .then(data => data.items || [])
+              .catch(() => [])
+          )
+        ),
+      ]);
 
-      const rssData = await Promise.all(
-        getAllSources().map((source) =>
-          fetch(RSS_PROXY + encodeURIComponent(source))
-            .then((res) => {
-              if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-              }
-              return res.json();
-            })
-            .then((data) => data.items || [])
-            .catch((error) => {
-              console.error(`Error fetching ${source}:`, error);
-              return [];
-            })
-        )
-      );
+      const processedRegulatory = processRegulatoryData(regulatoryData);
 
-      const processedRegulatory = includeBig4 ? [] : processRegulatoryData(regulatoryData);
-
-      const processedRSS = rssData.flat().map((item) => {
+      // Process RSS news
+      const processedRSS = rssNews.flat().map(item => {
         const { categories, industries } = categorizeArticle(item);
         return {
           title: item.title || '',
@@ -413,31 +438,28 @@ const GreenGator = () => {
           link: item.link,
           source: item.link ? new URL(item.link).hostname : 'Unknown',
           categories,
-          industries,
+          industries
         };
       });
 
-      let allNews = [...processedRegulatory, ...processedRSS];
+      // Combine and filter all news
+      const allNews = [...processedRegulatory, ...processedRSS].filter(item => {
+        // Skip items only categorized as Other/General
+        if (item.categories.length === 1 &&
+          item.categories[0] === 'Other' &&
+          item.industries.length === 1 &&
+          item.industries[0] === 'General') {
+          return false;
+        }
+        return (selectedCategory === 'all' || item.categories.includes(selectedCategory)) &&
+          (selectedIndustry === 'all' || item.industries.includes(selectedIndustry));
+      });
 
-      // If Big4 is ON, do NOT filter out Other/General.
-      if (!includeBig4) {
-        allNews = allNews.filter((item) => {
-          if (
-            item.categories.length === 1 &&
-            item.categories[0] === 'Other' &&
-            item.industries.length === 1 &&
-            item.industries[0] === 'General'
-          ) {
-            return false;
-          }
-          return true;
-        });
-      }
+      // Remove duplicates and sort
+      const uniqueNews = Array.from(new Map(allNews.map(item => [item.title, item])).values())
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      const uniqueNews = Array.from(new Map(allNews.map((item) => [item.title, item])).values()).sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-      );
-
+      // Check for new updates
       if (uniqueNews.length > news.length) {
         setNewUpdates(true);
       } else {
@@ -456,12 +478,12 @@ const GreenGator = () => {
     fetchNews();
     const interval = setInterval(fetchNews, 3600000); // Refresh every hour
     return () => clearInterval(interval);
-  }, [selectedCategory, selectedIndustry, includeBig4]);
+  }, [selectedCategory, selectedIndustry]);
 
-  const toggleArticleSelection = (article) => {
-    setSelectedArticles((prevSelected) => {
+  const toggleArticleSelection = article => {
+    setSelectedArticles(prevSelected => {
       if (prevSelected.includes(article.link)) {
-        return prevSelected.filter((link) => link !== article.link);
+        return prevSelected.filter(link => link !== article.link);
       } else {
         return [...prevSelected, article.link];
       }
@@ -471,9 +493,9 @@ const GreenGator = () => {
   const emailSelectedArticles = () => {
     // Prepend 🐊: to the subject line
     const subject = '🐊: Selected Articles from GreenGator';
-    const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
+    const selectedArticleObjects = news.filter(item => selectedArticles.includes(item.link));
     const body = selectedArticleObjects
-      .map((item) => `${item.title}\nRead more here: ${item.link}\n\n`)
+      .map(item => `${item.title}\nRead more here: ${item.link}\n\n`)
       .join('');
     const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
@@ -484,30 +506,13 @@ const GreenGator = () => {
     }
   };
 
-  const copySelectedArticlesToClipboard = () => {
-    const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
-    const content = selectedArticleObjects
-      .map((item) => `${item.title}\nRead more here: ${item.link}\n\n`)
-      .join('');
-
-    navigator.clipboard.writeText(content).then(
-      () => {
-        alert('Selected articles copied to clipboard. You can now paste them into your email.');
-      },
-      (err) => {
-        alert('Failed to copy articles to clipboard.');
-        console.error('Clipboard error:', err);
-      }
-    );
-  };
-
-  const allSelected = news.length > 0 && news.every((item) => selectedArticles.includes(item.link));
+  const allSelected = news.length > 0 && news.every(item => selectedArticles.includes(item.link));
 
   const toggleSelectAll = () => {
     if (allSelected) {
       setSelectedArticles([]);
     } else {
-      setSelectedArticles(news.map((item) => item.link));
+      setSelectedArticles(news.map(item => item.link));
     }
   };
 
@@ -515,7 +520,7 @@ const GreenGator = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-green-800">GreenGator 🐊</h1>
+          <h1 className="text-4xl font-bold text-green-800">GreenGator</h1>
           <div className="flex items-center">
             {newUpdates && (
               <span className="mr-4 px-2 py-1 bg-red-500 text-white rounded-full text-sm">New Updates</span>
@@ -530,20 +535,18 @@ const GreenGator = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Line</label>
             <select
               className="w-full p-2 border rounded-lg"
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={e => setSelectedCategory(e.target.value)}
               disabled={loading}
             >
               <option value="all">All Business Lines</option>
-              {CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
+              {CATEGORIES.map(category => (
+                <option key={category} value={category}>{category}</option>
               ))}
             </select>
           </div>
@@ -553,26 +556,14 @@ const GreenGator = () => {
             <select
               className="w-full p-2 border rounded-lg"
               value={selectedIndustry}
-              onChange={(e) => setSelectedIndustry(e.target.value)}
+              onChange={e => setSelectedIndustry(e.target.value)}
               disabled={loading}
             >
               <option value="all">All Industries</option>
-              {Object.keys(INDUSTRIES).map((industry) => (
-                <option key={industry} value={industry}>
-                  {industry}
-                </option>
+              {Object.keys(INDUSTRIES).map(industry => (
+                <option key={industry} value={industry}>{industry}</option>
               ))}
             </select>
-          </div>
-
-          <div className="flex items-center space-x-2 mt-6">
-            <input
-              type="checkbox"
-              checked={includeBig4}
-              onChange={(e) => setIncludeBig4(e.target.checked)}
-              className="form-checkbox h-5 w-5 text-green-600"
-            />
-            <span className="text-gray-700">Include Big 4 Only</span>
           </div>
         </div>
 
@@ -591,18 +582,12 @@ const GreenGator = () => {
         )}
 
         {selectedArticles.length > 0 && (
-          <div className="mb-4 flex space-x-4">
+          <div className="mb-4">
             <button
               onClick={emailSelectedArticles}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Email Selected Articles ({selectedArticles.length})
-            </button>
-            <button
-              onClick={copySelectedArticlesToClipboard}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
-            >
-              Copy Selected Articles
             </button>
           </div>
         )}
@@ -623,10 +608,7 @@ const GreenGator = () => {
               </div>
             ) : (
               news.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6"
-                >
+                <div key={index} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
                   <div className="flex justify-between items-start mb-4">
                     <h2 className="text-xl font-semibold text-gray-900">{item.title}</h2>
                     <span className="text-sm text-gray-500">
@@ -636,20 +618,10 @@ const GreenGator = () => {
                   <p className="text-gray-600 mb-4">{item.description}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {item.categories.map((cat, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm"
-                      >
-                        {cat}
-                      </span>
+                      <span key={i} className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">{cat}</span>
                     ))}
                     {item.industries.map((ind, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                      >
-                        {ind}
-                      </span>
+                      <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">{ind}</span>
                     ))}
                   </div>
                   <div className="flex justify-between items-center">
