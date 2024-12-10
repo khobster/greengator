@@ -8,7 +8,10 @@ const GreenGator = () => {
   const [selectedArticles, setSelectedArticles] = React.useState([]);
   const [includeBig4, setIncludeBig4] = React.useState(false);
 
+  // Normal feeds use rss2json.com
   const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
+  // Big 4 feeds use Firebase proxy
+  const FIREBASE_PROXY = 'https://us-central1-greengatorproxy.cloudfunctions.net/fetchRss?url=';
 
   const KEYWORD_WEIGHTS = {
     'Technical & Operational Accounting': {
@@ -21,27 +24,14 @@ const GreenGator = () => {
     },
     'Strategic Finance': {
       primary: [
-        'financial planning',
-        'FP&A',
-        'financial analytics',
-        'corporate strategy',
-        'financial modeling',
-        'data analytics',
-        'business intelligence',
-        'scenario planning',
-        'corporate finance strategy',
-        'performance metrics',
-        'key performance indicators',
-        'KPIs',
+        'financial planning', 'FP&A', 'financial analytics', 'corporate strategy',
+        'financial modeling', 'data analytics', 'business intelligence',
+        'scenario planning', 'corporate finance strategy', 'performance metrics',
+        'key performance indicators', 'KPIs',
       ],
       secondary: [
-        'financial forecast',
-        'budget planning',
-        'strategic planning',
-        'financial strategy',
-        'decision support',
-        'financial reporting',
-        'variance analysis',
+        'financial forecast', 'budget planning', 'strategic planning', 'financial strategy',
+        'decision support', 'financial reporting', 'variance analysis',
       ],
     },
     'ESG & Sustainability': {
@@ -50,24 +40,13 @@ const GreenGator = () => {
     },
     'Operational Transformation': {
       primary: [
-        'process improvement',
-        'operational efficiency',
-        'business transformation',
-        'process optimization',
-        'change management',
-        'lean operations',
-        'six sigma',
-        'cost reduction',
-        'performance improvement',
-        'operational excellence',
+        'process improvement', 'operational efficiency', 'business transformation',
+        'process optimization', 'change management', 'lean operations', 'six sigma',
+        'cost reduction', 'performance improvement', 'operational excellence',
       ],
       secondary: [
-        'workflow optimization',
-        'process automation',
-        'continuous improvement',
-        'operational strategy',
-        'efficiency enhancement',
-        'productivity improvement',
+        'workflow optimization', 'process automation', 'continuous improvement',
+        'operational strategy', 'efficiency enhancement', 'productivity improvement',
       ],
     },
     'Technology Transformation': {
@@ -103,28 +82,14 @@ const GreenGator = () => {
     },
     'Valuation Services': {
       primary: [
-        'business valuation',
-        'fair value',
-        'asset valuation',
-        'valuation analysis',
-        'purchase price allocation',
-        'goodwill impairment',
-        'intangible assets',
-        'financial instruments valuation',
-        'complex securities',
-        'ASC 820',
-        'ASC 805',
+        'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
+        'purchase price allocation', 'goodwill impairment', 'intangible assets',
+        'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
         'valuation methodologies',
       ],
       secondary: [
-        'appraisal',
-        'valuation method',
-        'market value',
-        'value assessment',
-        'discounted cash flow',
-        'DCF',
-        'enterprise value',
-        'equity value',
+        'appraisal', 'valuation method', 'market value', 'value assessment',
+        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
       ],
     },
     'Transaction Advisory': {
@@ -151,8 +116,6 @@ const GreenGator = () => {
       secondary: ['memorandum', 'announcement', 'determination', 'private letter'],
     },
   };
-
-  const CATEGORIES = Object.keys(KEYWORD_WEIGHTS);
 
   const INDUSTRIES = {
     'Business Services': {
@@ -337,7 +300,6 @@ const GreenGator = () => {
 
   const getAllSources = () => {
     if (includeBig4) {
-      // Big 4 only mode
       return BIG4_SOURCES;
     }
 
@@ -402,23 +364,51 @@ const GreenGator = () => {
       .filter(Boolean);
   };
 
+  const fetchFeeds = async (sourceUrls, useFirebaseForBig4 = false) => {
+    if (useFirebaseForBig4) {
+      // Fetch Big 4 feeds from Firebase proxy
+      return Promise.all(
+        sourceUrls.map(source =>
+          fetch(FIREBASE_PROXY + encodeURIComponent(source))
+            .then(res => res.json())
+            .then(data => data.items || [])
+            .catch(() => [])
+        )
+      );
+    } else {
+      // Fetch normal feeds from rss2json.com
+      return Promise.all(
+        sourceUrls.map(source =>
+          fetch(RSS_PROXY + encodeURIComponent(source))
+            .then(res => res.json())
+            .then(data => data.items || [])
+            .catch(() => [])
+        )
+      );
+    }
+  };
+
   const fetchNews = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [regulatoryData, rssNews] = await Promise.all([
-        fetchRegulatoryData(),
-        Promise.all(
-          getAllSources().map(source =>
-            fetch(RSS_PROXY + encodeURIComponent(source))
-              .then(res => res.json())
-              .then(data => data.items || [])
-              .catch(() => [])
-          )
-        ),
-      ]);
+      const sources = getAllSources();
+      let regulatoryData = [];
+      let rssNews = [];
 
-      const processedRegulatory = processRegulatoryData(regulatoryData);
+      // Fetch regulatory data only if not in Big 4 mode
+      if (!includeBig4) {
+        regulatoryData = await fetchRegulatoryData();
+      }
+
+      // If Big 4 mode is on, use Firebase proxy; otherwise, use rss2json
+      if (includeBig4) {
+        rssNews = await fetchFeeds(sources, true);
+      } else {
+        rssNews = await fetchFeeds(sources, false);
+      }
+
+      const processedRegulatory = includeBig4 ? [] : processRegulatoryData(regulatoryData);
 
       const processedRSS = rssNews.flat().map(item => {
         const { categories, industries } = categorizeArticle(item);
@@ -502,7 +492,6 @@ const GreenGator = () => {
     }
   };
 
-  // Toggle Big 4 mode when the button is clicked
   const toggleBig4 = () => {
     setIncludeBig4(prev => !prev);
   };
@@ -523,7 +512,6 @@ const GreenGator = () => {
             >
               {loading ? 'Refreshing...' : 'Refresh News'}
             </button>
-            {/* Big 4 Fun Button: toggles Big 4 mode */}
             <button
               onClick={toggleBig4}
               className="px-4 py-2 font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
