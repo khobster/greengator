@@ -103,14 +103,28 @@ const GreenGator = () => {
     },
     'Valuation Services': {
       primary: [
-        'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
-        'purchase price allocation', 'goodwill impairment', 'intangible assets',
-        'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
+        'business valuation',
+        'fair value',
+        'asset valuation',
+        'valuation analysis',
+        'purchase price allocation',
+        'goodwill impairment',
+        'intangible assets',
+        'financial instruments valuation',
+        'complex securities',
+        'ASC 820',
+        'ASC 805',
         'valuation methodologies',
       ],
       secondary: [
-        'appraisal', 'valuation method', 'market value', 'value assessment',
-        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
+        'appraisal',
+        'valuation method',
+        'market value',
+        'value assessment',
+        'discounted cash flow',
+        'DCF',
+        'enterprise value',
+        'equity value',
       ],
     },
     'Transaction Advisory': {
@@ -265,7 +279,6 @@ const GreenGator = () => {
     },
   };
 
-  // Big 4 Sources
   const BIG4_SOURCES = [
     'https://rss.app/feeds/RXmiGOBWPMg9xdmA.xml',
     'https://rss.app/feeds/fR519PfuWAHfWltI.xml',
@@ -277,7 +290,6 @@ const GreenGator = () => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
     const scores = {};
 
-    // Score categories
     Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
       scores[category] = 0;
       weights.primary.forEach((keyword) => {
@@ -288,7 +300,6 @@ const GreenGator = () => {
       });
     });
 
-    // Score industries
     Object.entries(INDUSTRIES).forEach(([industry, data]) => {
       scores[industry] = 0;
       data.keywords.forEach((keyword) => {
@@ -325,30 +336,27 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    let sources = [
+    if (includeBig4) {
+      // Big 4 only mode
+      return BIG4_SOURCES;
+    }
+
+    const sources = [
       ...Object.values(NEWS_SOURCES)
         .filter((value) => Array.isArray(value))
         .flat(),
       ...Object.values(INDUSTRIES).flatMap((industry) => industry.sources),
     ];
-
-    // If includeBig4 is on, mix Big 4 sources into the existing sources
-    if (includeBig4) {
-      sources = [...sources, ...BIG4_SOURCES];
-    }
-
     return [...new Set(sources)];
   };
 
   const fetchRegulatoryData = async () => {
     try {
-      // SEC RSS Feed
       const secRssUrl = 'https://www.sec.gov/news/pressreleases.rss';
       const secResponse = await fetch(RSS_PROXY + encodeURIComponent(secRssUrl));
       const secData = await secResponse.json();
       const secItems = secData.items || [];
 
-      // IRS RSS Feed
       const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
       const irsResponse = await fetch(RSS_PROXY + encodeURIComponent(irsRssUrl));
       const irsData = await irsResponse.json();
@@ -426,7 +434,6 @@ const GreenGator = () => {
       });
 
       const allNews = [...processedRegulatory, ...processedRSS].filter(item => {
-        // Skip items only categorized as Other/General
         if (item.categories.length === 1 &&
           item.categories[0] === 'Other' &&
           item.industries.length === 1 &&
@@ -471,7 +478,6 @@ const GreenGator = () => {
   };
 
   const emailSelectedArticles = () => {
-    // Prepend 🐊:
     const subject = '🐊: Selected Articles from GreenGator';
     const selectedArticleObjects = news.filter(item => selectedArticles.includes(item.link));
     const body = selectedArticleObjects
@@ -496,14 +502,19 @@ const GreenGator = () => {
     }
   };
 
+  // Toggle Big 4 mode when the button is clicked
+  const toggleBig4 = () => {
+    setIncludeBig4(prev => !prev);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-green-800">GreenGator 🐊</h1>
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             {newUpdates && (
-              <span className="mr-4 px-2 py-1 bg-red-500 text-white rounded-full text-sm">New Updates</span>
+              <span className="px-2 py-1 bg-red-500 text-white rounded-full text-sm">New Updates</span>
             )}
             <button
               onClick={fetchNews}
@@ -512,10 +523,17 @@ const GreenGator = () => {
             >
               {loading ? 'Refreshing...' : 'Refresh News'}
             </button>
+            {/* Big 4 Fun Button: toggles Big 4 mode */}
+            <button
+              onClick={toggleBig4}
+              className="px-4 py-2 font-bold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              {includeBig4 ? 'Back to Normal' : 'Big 4 Fun'}
+            </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Line</label>
             <select
@@ -544,17 +562,6 @@ const GreenGator = () => {
                 <option key={industry} value={industry}>{industry}</option>
               ))}
             </select>
-          </div>
-
-          {/* Include Big 4 checkbox */}
-          <div className="flex items-center space-x-2 mt-6">
-            <input
-              type="checkbox"
-              checked={includeBig4}
-              onChange={(e) => setIncludeBig4(e.target.checked)}
-              className="form-checkbox h-5 w-5 text-green-600"
-            />
-            <span className="text-gray-700">Include Big 4</span>
           </div>
         </div>
 
