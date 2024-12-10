@@ -190,6 +190,18 @@ const GreenGator = () => {
     },
   };
 
+  // Direct RSS feeds for Big 4 press releases/news:
+  const BIG4_SOURCES = [
+    // PwC US Press Releases
+    'https://www.pwc.com/us/en/feeds/rss/press-releases.xml',
+    // Deloitte US Press Releases
+    'https://www2.deloitte.com/content/dam/Deloitte/us/RSS-Feeds/deloitte-us-press-releases-feed.xml',
+    // KPMG (Global Press Releases)
+    'https://home.kpmg/xx/en/home/insights/feeds/press-releases.xml',
+    // EY Global Press Releases
+    'https://www.ey.com/en_gl/rss/Press-releases'
+  ];
+
   const NEWS_SOURCES = {
     accounting: [
       'https://www.accountingtoday.com/rss',
@@ -251,10 +263,6 @@ const GreenGator = () => {
     },
   };
 
-  const BIG4_SOURCES = [
-    'https://news.google.com/rss/search?q=PwC+OR+Deloitte+OR+KPMG+OR+EY+when:30d'
-  ];
-
   const categorizeArticle = (article) => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
     const scores = {};
@@ -305,7 +313,6 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    // If Big 4 toggle is on, ONLY fetch Big 4 sources
     if (includeBig4) {
       return BIG4_SOURCES;
     }
@@ -376,7 +383,6 @@ const GreenGator = () => {
     setLoading(true);
     setError(null);
     try {
-      // If Big4 is on, skip regulatory data
       let regulatoryData = [];
       if (!includeBig4) {
         regulatoryData = await fetchRegulatoryData();
@@ -414,20 +420,22 @@ const GreenGator = () => {
         };
       });
 
-      const allNews = [...processedRegulatory, ...processedRSS].filter((item) => {
-        if (
-          item.categories.length === 1 &&
-          item.categories[0] === 'Other' &&
-          item.industries.length === 1 &&
-          item.industries[0] === 'General'
-        ) {
-          return false;
-        }
-        return (
-          (selectedCategory === 'all' || item.categories.includes(selectedCategory)) &&
-          (selectedIndustry === 'all' || item.industries.includes(selectedIndustry))
-        );
-      });
+      let allNews = [...processedRegulatory, ...processedRSS];
+
+      // If Big4 is ON, do not filter out Other/General articles.
+      if (!includeBig4) {
+        allNews = allNews.filter((item) => {
+          if (
+            item.categories.length === 1 &&
+            item.categories[0] === 'Other' &&
+            item.industries.length === 1 &&
+            item.industries[0] === 'General'
+          ) {
+            return false;
+          }
+          return true;
+        });
+      }
 
       const uniqueNews = Array.from(new Map(allNews.map((item) => [item.title, item])).values()).sort(
         (a, b) => new Date(b.date) - new Date(a.date)
