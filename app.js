@@ -6,6 +6,7 @@ const GreenGator = () => {
   const [error, setError] = React.useState(null);
   const [newUpdates, setNewUpdates] = React.useState(false);
   const [selectedArticles, setSelectedArticles] = React.useState([]);
+  const [includeBig4, setIncludeBig4] = React.useState(false);
 
   const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
@@ -20,27 +21,14 @@ const GreenGator = () => {
     },
     'Strategic Finance': {
       primary: [
-        'financial planning',
-        'FP&A',
-        'financial analytics',
-        'corporate strategy',
-        'financial modeling',
-        'data analytics',
-        'business intelligence',
-        'scenario planning',
-        'corporate finance strategy',
-        'performance metrics',
-        'key performance indicators',
-        'KPIs',
+        'financial planning', 'FP&A', 'financial analytics', 'corporate strategy',
+        'financial modeling', 'data analytics', 'business intelligence',
+        'scenario planning', 'corporate finance strategy', 'performance metrics',
+        'key performance indicators', 'KPIs',
       ],
       secondary: [
-        'financial forecast',
-        'budget planning',
-        'strategic planning',
-        'financial strategy',
-        'decision support',
-        'financial reporting',
-        'variance analysis',
+        'financial forecast', 'budget planning', 'strategic planning', 'financial strategy',
+        'decision support', 'financial reporting', 'variance analysis',
       ],
     },
     'ESG & Sustainability': {
@@ -49,24 +37,13 @@ const GreenGator = () => {
     },
     'Operational Transformation': {
       primary: [
-        'process improvement',
-        'operational efficiency',
-        'business transformation',
-        'process optimization',
-        'change management',
-        'lean operations',
-        'six sigma',
-        'cost reduction',
-        'performance improvement',
-        'operational excellence',
+        'process improvement', 'operational efficiency', 'business transformation',
+        'process optimization', 'change management', 'lean operations', 'six sigma',
+        'cost reduction', 'performance improvement', 'operational excellence',
       ],
       secondary: [
-        'workflow optimization',
-        'process automation',
-        'continuous improvement',
-        'operational strategy',
-        'efficiency enhancement',
-        'productivity improvement',
+        'workflow optimization', 'process automation', 'continuous improvement',
+        'operational strategy', 'efficiency enhancement', 'productivity improvement',
       ],
     },
     'Technology Transformation': {
@@ -83,27 +60,13 @@ const GreenGator = () => {
     },
     'Forensic Accounting': {
       primary: [
-        'fraud detection',
-        'forensic investigation',
-        'financial fraud',
-        'forensic audit',
-        'litigation support',
-        'financial disputes',
-        'compliance investigations',
-        'asset misappropriation',
-        'financial statement fraud',
-        'anti-money laundering',
-        'AML',
-        'FCPA violations',
+        'fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit',
+        'litigation support', 'financial disputes', 'compliance investigations', 'asset misappropriation',
+        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations',
       ],
       secondary: [
-        'fraud risk',
-        'investigation',
-        'dispute',
-        'fraud scheme',
-        'regulatory enforcement',
-        'whistleblower',
-        'internal investigation',
+        'fraud risk', 'investigation', 'dispute', 'fraud scheme', 'regulatory enforcement',
+        'whistleblower', 'internal investigation',
       ],
     },
     'Tax Services': {
@@ -116,32 +79,22 @@ const GreenGator = () => {
     },
     'Valuation Services': {
       primary: [
-        'business valuation',
-        'fair value',
-        'asset valuation',
-        'valuation analysis',
-        'purchase price allocation',
-        'goodwill impairment',
-        'intangible assets',
-        'financial instruments valuation',
-        'complex securities',
-        'ASC 820',
-        'ASC 805',
+        'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
+        'purchase price allocation', 'goodwill impairment', 'intangible assets',
+        'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
         'valuation methodologies',
       ],
       secondary: [
-        'appraisal',
-        'valuation method',
-        'market value',
-        'value assessment',
-        'discounted cash flow',
-        'DCF',
-        'enterprise value',
-        'equity value',
+        'appraisal', 'valuation method', 'market value', 'value assessment',
+        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
       ],
     },
     'Transaction Advisory': {
       primary: ['M&A', 'due diligence', 'merger', 'acquisition'],
+      secondary: ['deal advisory', 'transaction support', 'deal value', 'deal structure'],
+    },
+    'M&A': {
+      primary: ['M&A', 'merger and acquisition', 'merger', 'acquisition'],
       secondary: ['deal advisory', 'transaction support', 'deal value', 'deal structure'],
     },
     'Workforce Transformation': {
@@ -193,6 +146,12 @@ const GreenGator = () => {
         'https://news.google.com/rss/search?q=banking+OR+insurance+OR+fintech+OR+"asset+management"+when:30d',
       ],
     },
+    'Banking': {
+      keywords: ['bank', 'banking', 'loan', 'credit', 'lending'],
+      sources: [
+        'https://news.google.com/rss/search?q=bank+OR+banking+OR+loan+OR+credit+OR+lending+when:30d'
+      ]
+    },
     Healthcare: {
       keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
       sources: [
@@ -231,66 +190,10 @@ const GreenGator = () => {
     },
   };
 
-  const NEWS_SOURCES = {
-    accounting: [
-      'https://www.accountingtoday.com/rss',
-      'https://www.journalofaccountancy.com/rss/all-news.xml',
-      'https://www.ifrs.org/news-and-events/updates/rss.xml',
-      'https://www.fasb.org/jsp/rss/rss.jsp?rssFeed=FASB_News_Releases',
-      'https://news.google.com/rss/search?q=GAAP+OR+IFRS+OR+"accounting+standards"+when:30d',
-    ],
-    markets: [
-      'https://www.marketwatch.com/rss/topstories',
-      'https://news.google.com/rss/search?q="capital+markets"+OR+IPO+OR+"debt+offering"+when:30d',
-    ],
-    esg: [
-      'https://www.esginvestor.net/feed/',
-      'https://www.esgtoday.com/feed/',
-      'https://news.google.com/rss/search?q=ESG+OR+"sustainability+reporting"+when:30d',
-    ],
-    tech: [
-      'https://feeds.feedburner.com/TheHackersNews',
-      'https://www.darkreading.com/rss.xml',
-      'https://news.google.com/rss/search?q=cybersecurity+OR+"digital+transformation"+when:30d',
-    ],
-    tax: [
-      'https://www.irs.gov/newsroom/rss',
-      'https://news.google.com/rss/search?q="tax+regulation"+OR+"tax+law"+OR+"tax+compliance"+when:30d',
-    ],
-    treasury: [
-      'https://news.google.com/rss/search?q="treasury+management"+OR+"cash+management"+when:30d',
-      'https://www.treasury-management.com/rss/news.php',
-    ],
-    workforce: [
-      'https://news.google.com/rss/search?q="workforce+transformation"+OR+"HR+transformation"+when:30d',
-      'https://www.shrm.org/rss/pages/rss.aspx',
-    ],
-    ma: [
-      'https://news.google.com/rss/search?q="mergers+and+acquisitions"+OR+"M&A+deals"+when:30d',
-      'https://www.dealmarket.com/feed',
-    ],
-    valuation: [
-      'https://news.google.com/rss/search?q="business+valuation"+OR+"asset+valuation"+when:90d',
-    ],
-    operational_transformation: [
-      'https://opexsociety.org/feed/',
-      'https://news.google.com/rss/search?q="operational+transformation"+OR+"process+optimization"+when:90d',
-    ],
-    forensic_accounting: [
-      'https://www.acfeinsights.com/feed/',
-      'https://news.google.com/rss/search?q="forensic+accounting"+OR+"fraud+investigation"+when:90d',
-    ],
-    strategic_finance: [
-      'https://news.google.com/rss/search?q="strategic+finance"+OR+"financial+planning"+OR+"FP&A"+when:90d',
-    ],
-    regulatory: {
-      sec: [
-        'https://www.sec.gov/news/pressreleases.rss',
-        'https://www.sec.gov/news/financial-reporting-alerts/rss',
-      ],
-      irs: ['https://www.irs.gov/newsroom/rss'],
-    },
-  };
+  // Big 4 sources - We'll only fetch these if the toggle is on
+  const BIG4_SOURCES = [
+    'https://news.google.com/rss/search?q=PwC+OR+Deloitte+OR+KPMG+OR+EY+when:30d'
+  ];
 
   const categorizeArticle = (article) => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
@@ -345,24 +248,29 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    const sources = [
+    // If Big 4 toggle is on, ONLY fetch Big 4 sources
+    if (includeBig4) {
+      return BIG4_SOURCES;
+    }
+
+    // Otherwise, fetch normal sources
+    let sources = [
       ...Object.values(NEWS_SOURCES)
         .filter((value) => Array.isArray(value))
         .flat(),
       ...Object.values(INDUSTRIES).flatMap((industry) => industry.sources),
     ];
+
     return [...new Set(sources)];
   };
 
   const fetchRegulatoryData = async () => {
     try {
-      // SEC RSS Feed
       const secRssUrl = 'https://www.sec.gov/news/pressreleases.rss';
       const secResponse = await fetch(RSS_PROXY + encodeURIComponent(secRssUrl));
       const secData = await secResponse.json();
       const secItems = secData.items || [];
 
-      // IRS RSS Feed
       const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
       const irsResponse = await fetch(RSS_PROXY + encodeURIComponent(irsRssUrl));
       const irsData = await irsResponse.json();
@@ -378,7 +286,6 @@ const GreenGator = () => {
   const processRegulatoryData = (data) => {
     return data
       .map((item) => {
-        // Identify source based on link
         const isSEC = item.link && item.link.includes('sec.gov');
         const isIRS = item.link && item.link.includes('irs.gov');
 
@@ -413,7 +320,6 @@ const GreenGator = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch both RSS and regulatory data in parallel
       const [rssNews, regulatoryData] = await Promise.all([
         Promise.all(
           getAllSources().map((source) =>
@@ -436,7 +342,6 @@ const GreenGator = () => {
 
       const processedRegulatory = processRegulatoryData(regulatoryData);
 
-      // Process RSS news
       const processedRSS = rssNews.flat().map((item) => {
         const { categories, industries } = categorizeArticle(item);
         return {
@@ -450,9 +355,7 @@ const GreenGator = () => {
         };
       });
 
-      // Combine and filter all news
       const allNews = [...processedRegulatory, ...processedRSS].filter((item) => {
-        // Skip items only categorized as Other/General
         if (
           item.categories.length === 1 &&
           item.categories[0] === 'Other' &&
@@ -467,12 +370,10 @@ const GreenGator = () => {
         );
       });
 
-      // Remove duplicates and sort
       const uniqueNews = Array.from(new Map(allNews.map((item) => [item.title, item])).values()).sort(
         (a, b) => new Date(b.date) - new Date(a.date)
       );
 
-      // Check for new updates
       if (uniqueNews.length > news.length) {
         setNewUpdates(true);
       } else {
@@ -491,9 +392,8 @@ const GreenGator = () => {
     fetchNews();
     const interval = setInterval(fetchNews, 3600000); // Refresh every hour
     return () => clearInterval(interval);
-  }, [selectedCategory, selectedIndustry]);
+  }, [selectedCategory, selectedIndustry, includeBig4]);
 
-  // Updated functions for article selection
   const toggleArticleSelection = (article) => {
     setSelectedArticles((prevSelected) => {
       if (prevSelected.includes(article.link)) {
@@ -517,6 +417,23 @@ const GreenGator = () => {
     } else {
       window.location.href = mailtoLink;
     }
+  };
+
+  const copySelectedArticlesToClipboard = () => {
+    const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
+    const content = selectedArticleObjects
+      .map((item) => `${item.title}\nRead more here: ${item.link}\n\n`)
+      .join('');
+
+    navigator.clipboard.writeText(content).then(
+      () => {
+        alert('Selected articles copied to clipboard. You can now paste them into your email.');
+      },
+      (err) => {
+        alert('Failed to copy articles to clipboard.');
+        console.error('Clipboard error:', err);
+      }
+    );
   };
 
   const allSelected = news.length > 0 && news.every((item) => selectedArticles.includes(item.link));
@@ -548,7 +465,7 @@ const GreenGator = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Line</label>
             <select
@@ -582,9 +499,19 @@ const GreenGator = () => {
               ))}
             </select>
           </div>
+
+          {/* Big 4 Toggle */}
+          <div className="flex items-center space-x-2 mt-6">
+            <input
+              type="checkbox"
+              checked={includeBig4}
+              onChange={(e) => setIncludeBig4(e.target.checked)}
+              className="form-checkbox h-5 w-5 text-green-600"
+            />
+            <span className="text-gray-700">Include Big 4 Only</span>
+          </div>
         </div>
 
-        {/* Add the Select All checkbox */}
         {news.length > 0 && (
           <div className="mb-4">
             <label className="inline-flex items-center">
@@ -599,14 +526,19 @@ const GreenGator = () => {
           </div>
         )}
 
-        {/* Add the Email Selected Articles button */}
         {selectedArticles.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-4 flex space-x-4">
             <button
               onClick={emailSelectedArticles}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               Email Selected Articles ({selectedArticles.length})
+            </button>
+            <button
+              onClick={copySelectedArticlesToClipboard}
+              className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+            >
+              Copy Selected Articles
             </button>
           </div>
         )}
@@ -659,7 +591,6 @@ const GreenGator = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500">{item.source}</span>
                     <div className="flex items-center space-x-4">
-                      {/* Add the checkbox for selection */}
                       <label className="inline-flex items-center">
                         <input
                           type="checkbox"
@@ -697,5 +628,4 @@ const GreenGator = () => {
   );
 };
 
-// Render the component
 ReactDOM.render(<GreenGator />, document.getElementById('root'));
