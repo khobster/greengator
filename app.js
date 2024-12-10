@@ -251,24 +251,12 @@ const GreenGator = () => {
     },
   };
 
-  // Example Big 4 feeds (Press releases + insights):
-  // Replace these with actual firm feeds you find.
+  // Use your generated feeds from rss.app here
   const BIG4_SOURCES = [
-    // PwC feeds
-    'https://www.pwc.com/us/en/feeds/rss/press-releases.xml',         // PwC press releases example
-    'https://www.pwc.com/us/en/feeds/rss/insights.xml',               // PwC insights (example)
-    
-    // Deloitte feeds
-    'https://www2.deloitte.com/content/dam/Deloitte/us/RSS-Feeds/deloitte-us-press-releases-feed.xml', // Deloitte press releases example
-    'https://www2.deloitte.com/us/en/insights/rss.xml',               // Deloitte insights (example)
-    
-    // KPMG feeds
-    'https://home.kpmg/xx/en/home/insights/feeds/press-releases.xml', // KPMG global press releases (example)
-    'https://home.kpmg/xx/en/home/insights/rss.xml',                  // KPMG insights (example)
-    
-    // EY feeds
-    'https://www.ey.com/en_gl/rss/Press-releases',                    // EY global press releases
-    'https://www.ey.com/en_gl/rss/Insights'                           // EY insights (example)
+    'https://rss.app/feeds/RXmiGOBWPMg9xdmA.xml',
+    'https://rss.app/feeds/fR519PfuWAHfWltI.xml',
+    'https://rss.app/feeds/HgOktHgpDtDm9YDf.xml',
+    'https://rss.app/feeds/kqcC60e2jDp4lzkI.xml'
   ];
 
   const categorizeArticle = (article) => {
