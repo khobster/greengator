@@ -24,11 +24,11 @@ const GreenGator = () => {
         'financial planning', 'FP&A', 'financial analytics', 'corporate strategy',
         'financial modeling', 'data analytics', 'business intelligence',
         'scenario planning', 'corporate finance strategy', 'performance metrics',
-        'key performance indicators', 'KPIs'
+        'key performance indicators', 'KPIs',
       ],
       secondary: [
         'financial forecast', 'budget planning', 'strategic planning', 'financial strategy',
-        'decision support', 'financial reporting', 'variance analysis'
+        'decision support', 'financial reporting', 'variance analysis',
       ],
     },
     'ESG & Sustainability': {
@@ -39,11 +39,11 @@ const GreenGator = () => {
       primary: [
         'process improvement', 'operational efficiency', 'business transformation',
         'process optimization', 'change management', 'lean operations', 'six sigma',
-        'cost reduction', 'performance improvement', 'operational excellence'
+        'cost reduction', 'performance improvement', 'operational excellence',
       ],
       secondary: [
         'workflow optimization', 'process automation', 'continuous improvement',
-        'operational strategy', 'efficiency enhancement', 'productivity improvement'
+        'operational strategy', 'efficiency enhancement', 'productivity improvement',
       ],
     },
     'Technology Transformation': {
@@ -62,11 +62,11 @@ const GreenGator = () => {
       primary: [
         'fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit',
         'litigation support', 'financial disputes', 'compliance investigations', 'asset misappropriation',
-        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations'
+        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations',
       ],
       secondary: [
         'fraud risk', 'investigation', 'dispute', 'fraud scheme', 'regulatory enforcement',
-        'whistleblower', 'internal investigation'
+        'whistleblower', 'internal investigation',
       ],
     },
     'Tax Services': {
@@ -82,11 +82,11 @@ const GreenGator = () => {
         'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
         'purchase price allocation', 'goodwill impairment', 'intangible assets',
         'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
-        'valuation methodologies'
+        'valuation methodologies',
       ],
       secondary: [
         'appraisal', 'valuation method', 'market value', 'value assessment',
-        'discounted cash flow', 'DCF', 'enterprise value', 'equity value'
+        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
       ],
     },
     'Transaction Advisory': {
@@ -190,7 +190,6 @@ const GreenGator = () => {
     },
   };
 
-  // NEWS_SOURCES re-added here
   const NEWS_SOURCES = {
     accounting: [
       'https://www.accountingtoday.com/rss',
@@ -306,6 +305,7 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
+    // If Big 4 toggle is on, ONLY fetch Big 4 sources
     if (includeBig4) {
       return BIG4_SOURCES;
     }
@@ -376,29 +376,32 @@ const GreenGator = () => {
     setLoading(true);
     setError(null);
     try {
-      const [rssNews, regulatoryData] = await Promise.all([
-        Promise.all(
-          getAllSources().map((source) =>
-            fetch(RSS_PROXY + encodeURIComponent(source))
-              .then((res) => {
-                if (!res.ok) {
-                  throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-              })
-              .then((data) => data.items || [])
-              .catch((error) => {
-                console.error(`Error fetching ${source}:`, error);
-                return [];
-              })
-          )
-        ),
-        fetchRegulatoryData(),
-      ]);
+      // If Big4 is on, skip regulatory data
+      let regulatoryData = [];
+      if (!includeBig4) {
+        regulatoryData = await fetchRegulatoryData();
+      }
 
-      const processedRegulatory = processRegulatoryData(regulatoryData);
+      const rssData = await Promise.all(
+        getAllSources().map((source) =>
+          fetch(RSS_PROXY + encodeURIComponent(source))
+            .then((res) => {
+              if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((data) => data.items || [])
+            .catch((error) => {
+              console.error(`Error fetching ${source}:`, error);
+              return [];
+            })
+        )
+      );
 
-      const processedRSS = rssNews.flat().map((item) => {
+      const processedRegulatory = includeBig4 ? [] : processRegulatoryData(regulatoryData);
+
+      const processedRSS = rssData.flat().map((item) => {
         const { categories, industries } = categorizeArticle(item);
         return {
           title: item.title || '',
