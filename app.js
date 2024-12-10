@@ -6,6 +6,7 @@ const GreenGator = () => {
   const [error, setError] = React.useState(null);
   const [newUpdates, setNewUpdates] = React.useState(false);
   const [selectedArticles, setSelectedArticles] = React.useState([]);
+  const [includeBig4, setIncludeBig4] = React.useState(false);
 
   const RSS_PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
@@ -83,27 +84,13 @@ const GreenGator = () => {
     },
     'Forensic Accounting': {
       primary: [
-        'fraud detection',
-        'forensic investigation',
-        'financial fraud',
-        'forensic audit',
-        'litigation support',
-        'financial disputes',
-        'compliance investigations',
-        'asset misappropriation',
-        'financial statement fraud',
-        'anti-money laundering',
-        'AML',
-        'FCPA violations',
+        'fraud detection', 'forensic investigation', 'financial fraud', 'forensic audit',
+        'litigation support', 'financial disputes', 'compliance investigations', 'asset misappropriation',
+        'financial statement fraud', 'anti-money laundering', 'AML', 'FCPA violations',
       ],
       secondary: [
-        'fraud risk',
-        'investigation',
-        'dispute',
-        'fraud scheme',
-        'regulatory enforcement',
-        'whistleblower',
-        'internal investigation',
+        'fraud risk', 'investigation', 'dispute', 'fraud scheme', 'regulatory enforcement',
+        'whistleblower', 'internal investigation',
       ],
     },
     'Tax Services': {
@@ -116,28 +103,14 @@ const GreenGator = () => {
     },
     'Valuation Services': {
       primary: [
-        'business valuation',
-        'fair value',
-        'asset valuation',
-        'valuation analysis',
-        'purchase price allocation',
-        'goodwill impairment',
-        'intangible assets',
-        'financial instruments valuation',
-        'complex securities',
-        'ASC 820',
-        'ASC 805',
+        'business valuation', 'fair value', 'asset valuation', 'valuation analysis',
+        'purchase price allocation', 'goodwill impairment', 'intangible assets',
+        'financial instruments valuation', 'complex securities', 'ASC 820', 'ASC 805',
         'valuation methodologies',
       ],
       secondary: [
-        'appraisal',
-        'valuation method',
-        'market value',
-        'value assessment',
-        'discounted cash flow',
-        'DCF',
-        'enterprise value',
-        'equity value',
+        'appraisal', 'valuation method', 'market value', 'value assessment',
+        'discounted cash flow', 'DCF', 'enterprise value', 'equity value',
       ],
     },
     'Transaction Advisory': {
@@ -292,11 +265,19 @@ const GreenGator = () => {
     },
   };
 
+  // Big 4 Sources
+  const BIG4_SOURCES = [
+    'https://rss.app/feeds/RXmiGOBWPMg9xdmA.xml',
+    'https://rss.app/feeds/fR519PfuWAHfWltI.xml',
+    'https://rss.app/feeds/HgOktHgpDtDm9YDf.xml',
+    'https://rss.app/feeds/kqcC60e2jDp4lzkI.xml'
+  ];
+
   const categorizeArticle = (article) => {
     const text = `${article.title} ${article.description || ''}`.toLowerCase();
     const scores = {};
 
-    // Score regular categories
+    // Score categories
     Object.entries(KEYWORD_WEIGHTS).forEach(([category, weights]) => {
       scores[category] = 0;
       weights.primary.forEach((keyword) => {
@@ -315,7 +296,6 @@ const GreenGator = () => {
       });
     });
 
-    // Special handling for SEC and IRS
     if (article.source === 'SEC EDGAR') {
       scores['Technical & Operational Accounting'] = 2;
       scores['Risk & Compliance'] = 2;
@@ -345,12 +325,18 @@ const GreenGator = () => {
   };
 
   const getAllSources = () => {
-    const sources = [
+    let sources = [
       ...Object.values(NEWS_SOURCES)
         .filter((value) => Array.isArray(value))
         .flat(),
       ...Object.values(INDUSTRIES).flatMap((industry) => industry.sources),
     ];
+
+    // If includeBig4 is on, mix Big 4 sources into the existing sources
+    if (includeBig4) {
+      sources = [...sources, ...BIG4_SOURCES];
+    }
+
     return [...new Set(sources)];
   };
 
@@ -378,7 +364,6 @@ const GreenGator = () => {
   const processRegulatoryData = (data) => {
     return data
       .map((item) => {
-        // Identify source based on link
         const isSEC = item.link && item.link.includes('sec.gov');
         const isIRS = item.link && item.link.includes('irs.gov');
 
@@ -413,7 +398,6 @@ const GreenGator = () => {
     setLoading(true);
     setError(null);
     try {
-      // Fetch both RSS and regulatory data in parallel
       const [regulatoryData, rssNews] = await Promise.all([
         fetchRegulatoryData(),
         Promise.all(
@@ -428,7 +412,6 @@ const GreenGator = () => {
 
       const processedRegulatory = processRegulatoryData(regulatoryData);
 
-      // Process RSS news
       const processedRSS = rssNews.flat().map(item => {
         const { categories, industries } = categorizeArticle(item);
         return {
@@ -442,7 +425,6 @@ const GreenGator = () => {
         };
       });
 
-      // Combine and filter all news
       const allNews = [...processedRegulatory, ...processedRSS].filter(item => {
         // Skip items only categorized as Other/General
         if (item.categories.length === 1 &&
@@ -455,11 +437,9 @@ const GreenGator = () => {
           (selectedIndustry === 'all' || item.industries.includes(selectedIndustry));
       });
 
-      // Remove duplicates and sort
       const uniqueNews = Array.from(new Map(allNews.map(item => [item.title, item])).values())
         .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      // Check for new updates
       if (uniqueNews.length > news.length) {
         setNewUpdates(true);
       } else {
@@ -478,7 +458,7 @@ const GreenGator = () => {
     fetchNews();
     const interval = setInterval(fetchNews, 3600000); // Refresh every hour
     return () => clearInterval(interval);
-  }, [selectedCategory, selectedIndustry]);
+  }, [selectedCategory, selectedIndustry, includeBig4]);
 
   const toggleArticleSelection = article => {
     setSelectedArticles(prevSelected => {
@@ -491,7 +471,7 @@ const GreenGator = () => {
   };
 
   const emailSelectedArticles = () => {
-    // Prepend 🐊: to the subject line
+    // Prepend 🐊:
     const subject = '🐊: Selected Articles from GreenGator';
     const selectedArticleObjects = news.filter(item => selectedArticles.includes(item.link));
     const body = selectedArticleObjects
@@ -520,7 +500,7 @@ const GreenGator = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold text-green-800">GreenGator</h1>
+          <h1 className="text-4xl font-bold text-green-800">GreenGator 🐊</h1>
           <div className="flex items-center">
             {newUpdates && (
               <span className="mr-4 px-2 py-1 bg-red-500 text-white rounded-full text-sm">New Updates</span>
@@ -535,7 +515,7 @@ const GreenGator = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Business Line</label>
             <select
@@ -564,6 +544,17 @@ const GreenGator = () => {
                 <option key={industry} value={industry}>{industry}</option>
               ))}
             </select>
+          </div>
+
+          {/* Include Big 4 checkbox */}
+          <div className="flex items-center space-x-2 mt-6">
+            <input
+              type="checkbox"
+              checked={includeBig4}
+              onChange={(e) => setIncludeBig4(e.target.checked)}
+              className="form-checkbox h-5 w-5 text-green-600"
+            />
+            <span className="text-gray-700">Include Big 4</span>
           </div>
         </div>
 
