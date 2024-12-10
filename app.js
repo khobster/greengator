@@ -8,21 +8,8 @@ const GreenGator = () => {
   const [selectedArticles, setSelectedArticles] = React.useState([]);
   const [includeBig4, setIncludeBig4] = React.useState(false);
 
-  // Using your Firebase Cloud Function endpoint
+  // Using your Firebase Cloud Function endpoint instead of rss2json.com
   const RSS_PROXY = 'https://us-central1-greengatorproxy.cloudfunctions.net/fetchRss?url=';
-
-  // Timeout in milliseconds
-  const REQUEST_TIMEOUT = 15000;
-
-  // A helper function to add a timeout to fetch
-  const fetchWithTimeout = (url, options = {}) => {
-    const { timeout = REQUEST_TIMEOUT } = options;
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-
-    return fetch(url, { ...options, signal: controller.signal })
-      .finally(() => clearTimeout(id));
-  };
 
   const KEYWORD_WEIGHTS = {
     'Technical & Operational Accounting': {
@@ -341,18 +328,15 @@ const GreenGator = () => {
       const secRssUrl = 'https://www.sec.gov/news/pressreleases.rss';
       const irsRssUrl = 'https://www.irs.gov/newsroom/rss';
 
-      const [secData, irsData] = await Promise.all([
-        fetchWithTimeout(RSS_PROXY + encodeURIComponent(secRssUrl))
-          .then(res => res.ok ? res.json() : [])
-          .then(data => data.items || [])
-          .catch(() => []),
-        fetchWithTimeout(RSS_PROXY + encodeURIComponent(irsRssUrl))
-          .then(res => res.ok ? res.json() : [])
-          .then(data => data.items || [])
-          .catch(() => [])
-      ]);
+      const secResponse = await fetch(RSS_PROXY + encodeURIComponent(secRssUrl));
+      const secData = await secResponse.json();
+      const secItems = secData.items || [];
 
-      return [...secData, ...irsData];
+      const irsResponse = await fetch(RSS_PROXY + encodeURIComponent(irsRssUrl));
+      const irsData = await irsResponse.json();
+      const irsItems = irsData.items || [];
+
+      return [...secItems, ...irsItems];
     } catch (error) {
       console.error('Regulatory API Error:', error);
       return [];
@@ -401,19 +385,18 @@ const GreenGator = () => {
         regulatoryData = await fetchRegulatoryData();
       }
 
-      const sources = getAllSources();
       const rssData = await Promise.all(
-        sources.map((source) =>
-          fetchWithTimeout(RSS_PROXY + encodeURIComponent(source))
-            .then(res => {
+        getAllSources().map((source) =>
+          fetch(RSS_PROXY + encodeURIComponent(source))
+            .then((res) => {
               if (!res.ok) {
                 throw new Error(`HTTP error! status: ${res.status}`);
               }
               return res.json();
             })
-            .then(data => data.items || [])
-            .catch((err) => {
-              console.error(`Error fetching ${source}:`, err);
+            .then((data) => data.items || [])
+            .catch((error) => {
+              console.error(`Error fetching ${source}:`, error);
               return [];
             })
         )
@@ -486,7 +469,7 @@ const GreenGator = () => {
   };
 
   const emailSelectedArticles = () => {
-    // Subject line starts with 🐊:
+    // Prepend 🐊: to the subject line
     const subject = '🐊: Selected Articles from GreenGator';
     const selectedArticleObjects = news.filter((item) => selectedArticles.includes(item.link));
     const body = selectedArticleObjects
