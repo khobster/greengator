@@ -145,6 +145,13 @@ const GreenGator = () => {
         'https://news.google.com/rss/search?q=banking+OR+insurance+OR+fintech+OR+"asset+management"+when:30d',
       ],
     },
+    // Adding the "Banking" industry
+    'Banking': {
+      keywords: ['bank', 'banking', 'loan', 'credit', 'lending'],
+      sources: [
+        'https://news.google.com/rss/search?q=bank+OR+banking+OR+loan+OR+credit+OR+lending+when:30d'
+      ]
+    },
     Healthcare: {
       keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
       sources: [
@@ -398,12 +405,10 @@ const GreenGator = () => {
       let regulatoryData = [];
       let rssNews = [];
 
-      // Fetch regulatory data only if not in Big 4 mode
       if (!includeBig4) {
         regulatoryData = await fetchRegulatoryData();
       }
 
-      // If Big4 is on, use Firebase proxy. Otherwise, rss2json
       if (includeBig4) {
         rssNews = await fetchFeeds(sources, true);
       } else {
