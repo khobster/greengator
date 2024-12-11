@@ -147,10 +147,32 @@ const GreenGator = () => {
     },
     // Adding the "Banking" industry
     'Banking': {
-      keywords: ['bank', 'banking', 'loan', 'credit', 'lending'],
-      sources: [
-        'https://news.google.com/rss/search?q=bank+OR+banking+OR+loan+OR+credit+OR+lending+when:30d'
-      ]
+      keywords: [
+    'bank', 'banking', 'loan', 'credit', 'lending', 'deposits', 'checking accounts', 
+    'savings accounts', 'money market accounts', 'certificates of deposit', 'CDs', 
+    'deposit rates', 'deposit insurance', 'commercial loans', 'consumer loans', 
+    'mortgages', 'auto loans', 'credit cards', 'loan origination', 'loan servicing', 
+    'loan portfolio management', 'non-performing loans', 'NPLs', 'payment processing', 
+    'ACH payments', 'wire transfers', 'mobile payments', 'digital wallets', 
+    'payment gateways', 'credit risk', 'market risk', 'operational risk', 
+    'liquidity risk', 'regulatory compliance', 'Basel III', 'stress testing', 
+    'capital adequacy', 'net interest margin', 'NIM', 'return on assets', 'ROA', 
+    'return on equity', 'ROE', 'efficiency ratio', 'cost of funds', 
+    'mergers and acquisitions', 'M&A', 'branch expansion', 'digital transformation', 
+    'customer acquisition', 'market share', 'financial statements', 
+    'regulatory reporting', 'accounting standards', 'audit', 'internal controls', 
+    'fintech', 'neobanks', 'challenger banks', 'open banking', 'API banking', 
+    'artificial intelligence', 'AI', 'machine learning', 'ML', 'blockchain', 
+    'cloud computing', 'cybersecurity', 'online banking', 'mobile banking', 
+    'digital channels', 'customer experience', 'personalization', 'Dodd-Frank Act', 
+    'Consumer Financial Protection Bureau', 'CFPB', 'Federal Reserve', 'FDIC', 'OCC', 
+    'anti-money laundering', 'AML', 'Know Your Customer', 'KYC', 'embedded finance', 
+    'Buy Now Pay Later', 'BNPL', 'environmental, social, and governance', 
+    'ESG investing', 'decentralized finance', 'DeFi' 
+  ],
+  sources: [
+    'https://news.google.com/rss/search?q=bank+OR+banking+OR+loan+OR+credit+OR+lending+when:30d'
+  ]
     },
     Healthcare: {
       keywords: ['healthcare', 'hospitals', 'medical', 'health insurance'],
